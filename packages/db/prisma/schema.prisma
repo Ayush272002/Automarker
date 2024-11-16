@@ -12,3 +12,83 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  role     Role     @default(STUDENT)
+  teacher  Teacher?
+  student  Student?
+}
+
+model Teacher {
+  id      String   @id @default(uuid())
+  userId  String   @unique
+  user    User     @relation(fields: [userId], references: [id])
+  courses Course[]
+}
+
+model Student {
+  id          String       @id @default(uuid())
+  userId      String       @unique
+  user        User         @relation(fields: [userId], references: [id])
+  submissions Submission[]
+  courses     Course[]
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  moduleLead  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  teacherId   String?
+  teacher     Teacher?     @relation(fields: [teacherId], references: [id])
+  students    Student[]
+  assignments Assignment[]
+}
+
+model Assignment {
+  id            String       @id @default(uuid())
+  title         String
+  description   String?
+  dueDate       DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  markingScript String?
+  requiredFiles String?
+  maxMarks      Int
+  courseId      String
+  course        Course       @relation(fields: [courseId], references: [id])
+  submissions   Submission[]
+}
+
+model Submission {
+  id               String            @id @default(uuid())
+  submittedAt      DateTime          @default(now())
+  assignmentZip    String
+  marksAchieved    Int               @default(-1)
+  logs             String?
+  assignmentId     String
+  assignment       Assignment        @relation(fields: [assignmentId], references: [id])
+  studentId        String
+  student          Student           @relation(fields: [studentId], references: [id])
+  submissionOutbox SubmissionOutbox?
+}
+
+model SubmissionOutbox {
+  id           String     @id @default(uuid())
+  submissionId String     @unique
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  eventType    String
+  payload      Json       @default("{}")
+  createdAt    DateTime   @default(now())
+  processedAt  DateTime?
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
