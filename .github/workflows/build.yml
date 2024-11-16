@@ -2,6 +2,8 @@ name: Build check on PR and Merge to main branch
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
