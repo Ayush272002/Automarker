@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@repo/db": "*",
+    "@repo/kafka": "*",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "esbuild": "^0.23.1",
