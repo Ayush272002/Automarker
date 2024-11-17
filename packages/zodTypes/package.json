@@ -1,22 +1,18 @@
 {
-  "name": "@repo/db",
+  "name": "@repo/zodtypes",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./user-types": "./src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^5.22.0",
-    "prisma": "^5.22.0"
-  },
-  "exports": {
-    "./client": "./src/index.ts"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "zod": "^3.23.8"
   }
 }

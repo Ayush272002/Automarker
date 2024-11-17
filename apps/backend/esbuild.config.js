@@ -11,7 +11,7 @@ esbuild
       'aws-sdk',
       'nock',
       '@mapbox/node-pre-gyp',
-      //   "bcrypt",
+      'bcrypt',
     ],
   })
   .catch(() => process.exit(1));
