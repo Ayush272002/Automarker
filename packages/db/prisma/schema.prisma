@@ -14,12 +14,14 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
-  password String
-  role     Role     @default(STUDENT)
-  teacher  Teacher?
-  student  Student?
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  teacher   Teacher?
+  student   Student?
 }
 
 model Teacher {
