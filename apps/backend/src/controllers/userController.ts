@@ -39,6 +39,8 @@ const createUser = async (req: Request, res: Response) => {
       },
     });
 
+    const userType = user.role;
+
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       return res.status(500).json({
@@ -56,7 +58,7 @@ const createUser = async (req: Request, res: Response) => {
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: userType === "STUDENT" ? "lax" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -104,6 +106,8 @@ const signin = async (req: Request, res: Response) => {
     });
   }
 
+  const userType = user.role;
+
   // sign the jwt
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
@@ -122,7 +126,7 @@ const signin = async (req: Request, res: Response) => {
   res.cookie('jwt', token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'none',
+    sameSite: userType === "STUDENT" ? "lax" : "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
