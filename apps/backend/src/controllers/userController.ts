@@ -58,7 +58,7 @@ const createUser = async (req: Request, res: Response) => {
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: true,
-      sameSite: userType === "STUDENT" ? "lax" : "strict",
+      sameSite: userType === 'STUDENT' ? 'lax' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -126,7 +126,7 @@ const signin = async (req: Request, res: Response) => {
   res.cookie('jwt', token, {
     httpOnly: true,
     secure: true,
-    sameSite: userType === "STUDENT" ? "lax" : "strict",
+    sameSite: userType === 'STUDENT' ? 'lax' : 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -140,7 +140,12 @@ const logout = async (req: Request, res: Response) => {
     res.clearCookie('jwt', {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'lax',
+    });
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
     return res.status(200).json({
       message: 'Logged out successfully',
