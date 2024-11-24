@@ -30,16 +30,25 @@ const createUser = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(parsedData.data.password, salt);
 
-    const user = await prisma.user.create({
-      data: {
-        firstName: parsedData.data.firstName,
-        lastName: parsedData.data.lastName,
-        email: parsedData.data.email,
-        password: hashedPassword,
-      },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          firstName: parsedData.data.firstName,
+          lastName: parsedData.data.lastName,
+          email: parsedData.data.email,
+          password: hashedPassword,
+          role: 'STUDENT',
+        },
+      });
 
-    const userType = user.role;
+      await tx.student.create({
+        data: {
+          userId: user.id,
+        },
+      });
+
+      return user;
+    });
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
@@ -49,7 +58,7 @@ const createUser = async (req: Request, res: Response) => {
     }
     const token = jwt.sign(
       {
-        id: user.id,
+        id: result.id,
       },
       jwtSecret,
       { expiresIn: '7d' }
@@ -58,7 +67,7 @@ const createUser = async (req: Request, res: Response) => {
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: true,
-      sameSite: userType === 'STUDENT' ? 'lax' : 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
