@@ -7,7 +7,7 @@ const AssignmentSubmission = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setSelectedFile(e.target.files[0]);
+      setSelectedFile(selectedFile);
     }
   };
 
