@@ -5,6 +5,7 @@ import { studentRouter } from './routes/student';
 import { teacherRouter } from './routes/teacher';
 import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user';
+import { assignmentRouter } from './routes/assignment';
 dotenv.config();
 
 const app = express();
@@ -35,6 +36,7 @@ const PORT = process.env.PORT || 8000;
 app.use('/api/v1/students', studentRouter);
 app.use('/api/v1/teachers', teacherRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/assignments', assignmentRouter);
 
 //global catch
 app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {

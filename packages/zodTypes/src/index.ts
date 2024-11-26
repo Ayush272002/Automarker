@@ -18,3 +18,10 @@ export const SigninSchema = z.object({
   email: z.string(),
   password: z.string(),
 });
+
+export const AllAssignmentsSchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid User ID' }),
+  courseId: z
+    .string({ required_error: 'Course ID is required' })
+    .uuid({ message: 'Invalid Course ID' }),
+});
