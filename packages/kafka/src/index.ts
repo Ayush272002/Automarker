@@ -56,3 +56,5 @@ class KafkaSingleton {
 const kafkaClient = KafkaSingleton;
 
 export default kafkaClient;
+
+export const SUBMIT_TOPIC = process.env.SUBMIT_TOPIC_NAME;
