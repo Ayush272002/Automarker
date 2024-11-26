@@ -1,48 +1,67 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Box, Button, Typography, Container, Alert } from '@mui/material';
+import { FileInput } from '@repo/ui';
 
-const AssignmentSubmission = () => {
+const AssignmentSubmission: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFile(selectedFile);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target?.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setErrorMessage(null); // Clear error message when a file is selected
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!selectedFile) {
-      alert('Please select a file!');
+      setErrorMessage('Please select a file!');
       return;
     }
 
-    // File upload testing
+    // File upload logic (mocked)
     console.log('Uploading file:', selectedFile.name);
 
     // TODO: Replace with API
-    alert(`File ${selectedFile.name} uploaded successfully!`);
+    setSuccessMessage(`File ${selectedFile.name} uploaded successfully!`);
+    setSelectedFile(null); // Clear file selection after submission
   };
 
   return (
-    <div className="container mt-5">
-      <h1>Submit Assignment</h1>
-      <p>Upload your assignment file below:</p>
+    <Container maxWidth="sm" sx={{ mt: 5 }}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Submit Assignment
+      </Typography>
+      <Typography variant="body1" align="center" gutterBottom>
+        Upload your assignment file below:
+      </Typography>
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <input
-            type="file"
-            className="form-control"
-            onChange={handleFileChange}
-          />
-        </div>
-        <button type="submit" className="btn btn-success">
+        <Box sx={{ mb: 3 }}>
+          {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+          {successMessage ? (
+            <Alert severity="success">{successMessage}</Alert>
+          ) : null}
+        </Box>
+        <Box sx={{ mb: 3 }}>
+          <FileInput onChange={handleFileChange} />
+        </Box>
+        <Button
+          type="submit"
+          variant="contained"
+          color="success"
+          fullWidth
+          disabled={!selectedFile}
+        >
           Submit
-        </button>
+        </Button>
       </form>
-    </div>
+    </Container>
   );
 };
 

@@ -1,11 +1,24 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Link from 'next/link';
+'use client';
 
-const StudentHome = () => {
+import React from 'react';
+import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+} from '@mui/material';
+
+const StudentHome: React.FC = () => {
   // Mock data for assignments
 
-  // TODO: API CALL
+  // TODO: Replace with API Call
   const currentAssignments = [
     { id: 1, title: 'Assignment 1', dueDate: '2024-12-01', status: 'Pending' },
     { id: 2, title: 'Assignment 2', dueDate: '2024-12-10', status: 'Pending' },
@@ -17,60 +30,83 @@ const StudentHome = () => {
   ];
 
   return (
-    <div className="container mt-5">
-      <h1 className="text-center mb-4">Student Dashboard</h1>
-      <div className="row">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <Typography variant="h4" component="h1" align="center" gutterBottom>
+        Student Dashboard
+      </Typography>
+      <div className="flex flex-wrap justify-center gap-6 mt-6">
         {/* Current Assignments */}
-        <div className="col-md-6">
-          <h3>Current Assignments</h3>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentAssignments.map((assignment) => (
-                <tr key={assignment.id}>
-                  <td>{assignment.title}</td>
-                  <td>{assignment.dueDate}</td>
-                  <td>{assignment.status}</td>
-                  <td>
-                    <Link href={`/student/assignments/${assignment.id}`}>
-                      <button className="btn btn-primary btn-sm">Submit</button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card className="w-full max-w-xl">
+          <CardContent>
+            <Typography variant="h6" component="h3" gutterBottom>
+              Current Assignments
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Due Date</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {currentAssignments.map((assignment) => (
+                    <TableRow key={assignment.id}>
+                      <TableCell>{assignment.title}</TableCell>
+                      <TableCell>{assignment.dueDate}</TableCell>
+                      <TableCell>{assignment.status}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/student/assignments/${assignment.id}`}
+                          passHref
+                        >
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                          >
+                            Submit
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
 
         {/* Previous Assignments */}
-        <div className="col-md-6">
-          <h3>Previous Assignments</h3>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Submitted Date</th>
-                <th>Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              {previousAssignments.map((assignment) => (
-                <tr key={assignment.id}>
-                  <td>{assignment.title}</td>
-                  <td>{assignment.submittedDate}</td>
-                  <td>{assignment.grade}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card className="w-full max-w-xl">
+          <CardContent>
+            <Typography variant="h6" component="h3" gutterBottom>
+              Previous Assignments
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Submitted Date</TableCell>
+                    <TableCell>Grade</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {previousAssignments.map((assignment) => (
+                    <TableRow key={assignment.id}>
+                      <TableCell>{assignment.title}</TableCell>
+                      <TableCell>{assignment.submittedDate}</TableCell>
+                      <TableCell>{assignment.grade}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
