@@ -1,5 +1,11 @@
-import { Router } from "express";
-import { createUser, logout, signin } from "../controllers/userController";
+import { Router } from 'express';
+import {
+  createUser,
+  getAllCourses,
+  logout,
+  signin,
+} from '../controllers/userController';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -9,5 +15,6 @@ router.post('/login', signin);
 
 router.post('/logout', logout);
 
-export const userRouter = router;
+router.get('/courses/all', authMiddleware, getAllCourses);
 
+export const userRouter = router;
