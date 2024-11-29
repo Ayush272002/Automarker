@@ -12,7 +12,7 @@ import {
 export function LoginCard() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:gap-8">
-      <Link href="/student/login">
+      <Link href="/students/login">
         <motion.div
           whileHover={{
             scale: 1.05,
