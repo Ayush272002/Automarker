@@ -4,6 +4,6 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.route('/all').get(authMiddleware, allAssignments);
+router.get('/all', authMiddleware, allAssignments);
 
 export const assignmentRouter = router;
