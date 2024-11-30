@@ -1,5 +1,8 @@
 import prisma from '@repo/db/client';
-import { AllAssignmentsSchema } from '@repo/zodtypes/user-types';
+import {
+  AllAssignmentsSchema,
+  GetAssignmentSchema,
+} from '@repo/zodtypes/user-types';
 import { Request, Response } from 'express';
 
 const allAssignments = async (req: Request, res: Response) => {
@@ -85,4 +88,72 @@ const allAssignments = async (req: Request, res: Response) => {
   }
 };
 
-export { allAssignments };
+const getAssignment = async (req: Request, res: Response) => {
+  const body = req.body;
+  const assignmentId = req.params.id;
+  const parsedData = GetAssignmentSchema.safeParse({ ...body, assignmentId });
+
+  if (!parsedData.success) {
+    return res.status(411).json({
+      message: parsedData.error.errors.map((err) => err.message).join(', '),
+    });
+  }
+
+  const user = await prisma.user.findFirst({
+    include: {
+      student: {
+        select: {
+          courses: {
+            select: {
+              assignments: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  dueDate: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  maxMarks: true,
+                },
+                where: {
+                  id: parsedData.data.assignmentId,
+                },
+              },
+            },
+          },
+        },
+      },
+      teacher: {
+        select: {
+          courses: {
+            select: {
+              assignments: {
+                where: {
+                  id: parsedData.data.assignmentId,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    where: {
+      id: parsedData.data.userId,
+    },
+  });
+
+  let assignmentDescription = user?.student?.courses.pop()?.assignments.pop();
+  if (!assignmentDescription) {
+    assignmentDescription = user?.teacher?.courses.pop()?.assignments.pop();
+  }
+
+  if (!assignmentDescription) {
+    return res.status(403).json({
+      message: 'You do not have access to this assignment.',
+    });
+  }
+
+  return res.status(200).json({ ...assignmentDescription });
+};
+
+export { allAssignments, getAssignment };

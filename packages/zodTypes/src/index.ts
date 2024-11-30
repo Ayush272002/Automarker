@@ -25,3 +25,10 @@ export const AllAssignmentsSchema = z.object({
     .string({ required_error: 'Course ID is required' })
     .uuid({ message: 'Invalid Course ID' }),
 });
+
+export const GetAssignmentSchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid User ID' }),
+  assignmentId: z
+    .string({ required_error: 'Course ID is required' })
+    .uuid({ message: 'Invalid Assignment ID' }),
+});
