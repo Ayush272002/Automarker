@@ -103,7 +103,7 @@ export default function StudentLoginPage() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', duration: 0.7 }}
       >
-        <Card className="backdrop-blur-xl bg-white/20 border-gray-400/30 shadow-xl">
+        <Card className="backdrop-blur-xl bg-white/20 border-gray-400/30 shadow-xl rounded-xl">
           <CardHeader className="space-y-1 pb-6">
             <motion.div
               initial={{ y: -20, opacity: 0 }}
@@ -134,7 +134,7 @@ export default function StudentLoginPage() {
                     id="email-id"
                     placeholder="Enter your email ID"
                     required
-                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
+                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-40 rounded-md"
                     onChange={(event) => setEmail(event.target.value)}
                   />
                 </motion.div>
@@ -147,14 +147,14 @@ export default function StudentLoginPage() {
                     type="password"
                     placeholder="Enter your password"
                     required
-                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
+                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-40 rounded-md"
                     onChange={(event) => setPassword(event.target.value)}
                   />
                 </motion.div>
 
                 <motion.div variants={itemVariants}>
                   <Button
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg transition-all hover:shadow-pink-500/50"
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg transition-all hover:shadow-pink-500/50 rounded-md"
                     type="submit"
                     disabled={isLoading}
                   >
