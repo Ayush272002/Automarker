@@ -205,7 +205,7 @@ export default function StudentLoginPage() {
         >
           Don&apos;t have an account?{' '}
           <Link
-            href="/student/register"
+            href="/student/login"
             className="text-pink-300 hover:text-pink-200 transition-colors hover:underline"
           >
             Register here
