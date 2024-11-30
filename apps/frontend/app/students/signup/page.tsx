@@ -42,33 +42,41 @@ const itemVariants = {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export default function StudentLoginPage() {
+export default function StudentSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    try {
-      event.preventDefault();
-      setIsLoading(true);
+    event.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
 
+    try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/v1/users/login`,
+        `${API_BASE_URL}/api/v1/users/signup`,
         {
+          firstName,
+          lastName,
           email,
           password,
         },
         { withCredentials: true }
       );
 
-      if (response.status === 200) {
-        toast.success('Logged in successfully');
+      if (response.status === 201) {
+        toast.success('User signed up successfully');
       } else {
-        toast.error('Invalid credentials');
+        throw new Error('Invalid credentials');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred. Please try again');
+      toast.error('An error occurred while signing up');
     } finally {
       setIsLoading(false);
     }
@@ -111,10 +119,10 @@ export default function StudentLoginPage() {
               transition={{ delay: 0.2 }}
             >
               <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-purple-300 to-pink-300 text-transparent bg-clip-text">
-                Student Login
+                Student Signup
               </CardTitle>
               <CardDescription className="text-center text-gray-200">
-                Enter your student credentials to access your account
+                Create your student account below
               </CardDescription>
             </motion.div>
           </CardHeader>
@@ -127,17 +135,45 @@ export default function StudentLoginPage() {
             >
               <div className="space-y-4">
                 <motion.div variants={itemVariants} className="space-y-2">
-                  <Label htmlFor="email-id" className="text-gray-200">
-                    Email ID
+                  <Label htmlFor="first-name" className="text-gray-200">
+                    First Name
                   </Label>
                   <Input
-                    id="email-id"
-                    placeholder="Enter your email ID"
+                    id="first-name"
+                    placeholder="Enter your first name"
+                    required
+                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
+                    onChange={(event) => setFirstName(event.target.value)}
+                  />
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="space-y-2">
+                  <Label htmlFor="last-name" className="text-gray-200">
+                    Last Name
+                  </Label>
+                  <Input
+                    id="last-name"
+                    placeholder="Enter your last name"
+                    required
+                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
+                    onChange={(event) => setLastName(event.target.value)}
+                  />
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-200">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
                     required
                     className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
                     onChange={(event) => setEmail(event.target.value)}
                   />
                 </motion.div>
+
                 <motion.div variants={itemVariants} className="space-y-2">
                   <Label htmlFor="password" className="text-gray-200">
                     Password
@@ -149,6 +185,20 @@ export default function StudentLoginPage() {
                     required
                     className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
                     onChange={(event) => setPassword(event.target.value)}
+                  />
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="space-y-2">
+                  <Label htmlFor="confirm-password" className="text-gray-200">
+                    Confirm Password
+                  </Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Enter your password again"
+                    required
+                    className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-400"
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                   />
                 </motion.div>
 
@@ -164,7 +214,7 @@ export default function StudentLoginPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
-                        Signing In...
+                        Signing Up...
                       </motion.div>
                     ) : (
                       <motion.div
@@ -172,7 +222,7 @@ export default function StudentLoginPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
-                        Sign In
+                        Sign Up
                       </motion.div>
                     )}
                   </Button>
@@ -188,29 +238,14 @@ export default function StudentLoginPage() {
               className="mt-4 text-center text-sm"
             >
               <Link
-                href="/forgot-password"
+                href="/students/login"
                 className="text-gray-200 hover:text-white transition-colors hover:underline"
               >
-                Forgot password?
+                Already have an account? Log in here
               </Link>
             </motion.div>
           </CardContent>
         </Card>
-
-        <motion.p
-          className="text-center text-sm text-gray-300 mt-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          Don&apos;t have an account?{' '}
-          <Link
-            href="/student/register"
-            className="text-pink-300 hover:text-pink-200 transition-colors hover:underline"
-          >
-            Register here
-          </Link>
-        </motion.p>
       </motion.div>
     </div>
   );
