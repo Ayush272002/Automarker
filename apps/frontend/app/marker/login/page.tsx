@@ -103,7 +103,7 @@ export default function MarkerLoginPage() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', duration: 0.7 }}
       >
-        <Card className="backdrop-blur-xl bg-white/20 border-gray-400/30 shadow-xl">
+        <Card className="backdrop-blur-xl bg-white/20 border-gray-400/30 shadow-xl rounded-xl">
           <CardHeader className="space-y-1 pb-6">
             <motion.div
               initial={{ y: -20, opacity: 0 }}
