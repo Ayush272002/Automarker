@@ -154,7 +154,7 @@ export default function StudentDashboard() {
                       {course.progress}% Complete
                     </span>
                   </div>
-                  <Link href={`/student/courses/${course.name.toLowerCase()}`}>
+                  <Link href={`/students/courses/${course.name.toLowerCase()}`}>
                     <Button
                       variant="outline"
                       className="mt-4 text-blue-400 hover:text-blue-500"
