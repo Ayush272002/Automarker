@@ -38,12 +38,21 @@ export default function MarkerDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
+      <motion.div
+        className="absolute inset-0 bg-grid-pattern opacity-5"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+      />
+
       <motion.aside
         initial={{ x: -200 }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="w-64 bg-gradient-to-b from-gray-900 to-gray-800 p-6 shadow-lg"
+        className="w-64 bg-gradient-to-b from-gray-800 to-gray-700 p-6 shadow-lg z-10"
       >
         <div className="flex items-center space-x-3">
           <ClipboardList className="h-6 w-6 text-blue-400" />
@@ -88,7 +97,7 @@ export default function MarkerDashboard() {
         className="flex-1 p-6"
       >
         <motion.div
-          className="p-6 bg-gradient-to-r from-blue-700 to-blue-500 rounded-lg shadow-lg"
+          className="p-6 bg-gradient-to-r from-blue-700 to-purple-500 rounded-lg shadow-lg"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2 }}

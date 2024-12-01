@@ -16,6 +16,7 @@ import {
 } from '@repo/ui';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const formVariants = {
   hidden: { opacity: 0 },
@@ -43,6 +44,7 @@ const itemVariants = {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function MarkerLoginPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -63,6 +65,7 @@ export default function MarkerLoginPage() {
 
       if (response.status === 200) {
         toast.success('Logged in successfully');
+        router.push('/marker/dashboard');
       } else {
         toast.error('Invalid credentials');
       }
