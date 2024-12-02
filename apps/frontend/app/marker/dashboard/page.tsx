@@ -1,41 +1,52 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Progress,
-} from '@repo/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
 import { ClipboardList, CheckSquare, FileCheck, User } from 'lucide-react';
 import Link from 'next/link';
+import { Course } from 'types/Course';
+import { Stats } from 'types/Stats';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function MarkerDashboard() {
-  const courses = [
-    {
-      name: 'Introduction to Programming',
-      studentCount: 40,
-      submitted: 25,
-      notSubmitted: 15,
-      id: 'course-1',
-    },
-    {
-      name: 'Advanced Mathematics',
-      studentCount: 30,
-      submitted: 20,
-      notSubmitted: 10,
-      id: 'course-2',
-    },
-  ];
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalCourses: 0,
+    totalStudents: 0,
+    totalSubmissions: 0,
+    pendingReviews: 0,
+  });
 
-  const stats = [
-    { label: 'Total Courses', value: 2, icon: ClipboardList },
-    { label: 'Total Students', value: 70, icon: User },
-    { label: 'Total Submissions', value: 45, icon: CheckSquare },
-    { label: 'Pending Reviews', value: 15, icon: FileCheck },
-  ];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [coursesRes, statsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/v1/teachers/dashboard`, {
+            credentials: 'include',
+          }),
+          fetch(`${API_BASE_URL}/api/v1/teachers/stats`, {
+            credentials: 'include',
+          }),
+        ]);
+
+        if (!coursesRes.ok || !statsRes.ok) {
+          throw new Error('Failed to fetch data');
+        }
+
+        const coursesData: Course[] = await coursesRes.json();
+        const statsData: Stats = await statsRes.json();
+
+        setCourses(coursesData);
+        setStats(statsData);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
@@ -109,7 +120,24 @@ export default function MarkerDashboard() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-          {stats.map((stat, index) => (
+          {[
+            {
+              label: 'Total Courses',
+              value: stats.totalCourses,
+              icon: ClipboardList,
+            },
+            { label: 'Total Students', value: stats.totalStudents, icon: User },
+            {
+              label: 'Total Submissions',
+              value: stats.totalSubmissions,
+              icon: CheckSquare,
+            },
+            {
+              label: 'Pending Reviews',
+              value: stats.pendingReviews,
+              icon: FileCheck,
+            },
+          ].map((stat, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -130,46 +158,32 @@ export default function MarkerDashboard() {
         </div>
 
         <h3 className="mt-8 text-xl font-bold">My Courses</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-          {courses.map((course, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + index * 0.1 }}
-            >
-              <Card className="bg-gray-800 text-white">
-                <CardHeader>
-                  <CardTitle>{course.name}</CardTitle>
-                  <p className="text-sm text-gray-400">
-                    Total Students: {course.studentCount}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          {courses.map((course) => (
+            <Card key={course.id} className="bg-gray-800 text-white">
+              <CardHeader>
+                <CardTitle>{course.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <p>
+                    <span className="font-semibold">Students:</span>{' '}
+                    {course.studentCount}
                   </p>
-                </CardHeader>
-                <CardContent>
-                  <Progress
-                    value={(course.submitted / course.studentCount) * 100}
-                    className="mt-2 bg-gray-700"
-                  />
-                  <div className="mt-2 text-sm">
-                    <span className="text-green-400">
-                      {course.submitted} Submitted
-                    </span>
-                    ,{' '}
-                    <span className="text-red-400">
-                      {course.notSubmitted} Not Submitted
-                    </span>
-                  </div>
-                  <Link href={`/marker/courses/${course.id}`}>
-                    <Button
-                      variant="outline"
-                      className="mt-4 text-blue-400 hover:text-blue-500"
-                    >
-                      View Details
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  <p>
+                    <span className="font-semibold">Submitted:</span>{' '}
+                    {course.submitted}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Not Submitted:</span>{' '}
+                    {course.notSubmitted}
+                  </p>
+                </div>
+                <Button variant="link" className="mt-4" asChild>
+                  <Link href={`/marker/courses/${course.id}`}>View Course</Link>
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </motion.main>
