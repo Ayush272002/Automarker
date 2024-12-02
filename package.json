@@ -42,5 +42,8 @@
     "packages/**/*.{js,jsx,ts,tsx,json,css,md}": [
       "prettier --write --config prettier.config.js"
     ]
+  },
+  "dependencies": {
+    "frontend": "^0.1.0"
   }
 }
