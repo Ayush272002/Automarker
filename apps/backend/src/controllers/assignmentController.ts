@@ -2,6 +2,7 @@ import prisma from '@repo/db/client';
 import {
   AllAssignmentsSchema,
   GetAssignmentSchema,
+  UpdateAssignmentSchema,
 } from '@repo/zodtypes/user-types';
 import { Request, Response } from 'express';
 
@@ -156,4 +157,60 @@ const getAssignment = async (req: Request, res: Response) => {
   return res.status(200).json({ ...assignmentDescription });
 };
 
-export { allAssignments, getAssignment };
+const updateAssignment = async (req: Request, res: Response) => {
+  const body = req.body;
+  const assignmentID = req.params.id;
+  const parsedData = UpdateAssignmentSchema.safeParse({
+    ...body,
+    assignmentId: assignmentID,
+  });
+
+  if (!parsedData.success) {
+    return res.status(411).json({
+      message: parsedData.error.errors.map((err) => err.message).join(', '),
+    });
+  }
+
+  const user = await prisma.user.findFirst({
+    select: {
+      teacher: {
+        select: {
+          courses: {
+            select: {
+              assignments: {
+                where: {
+                  id: parsedData.data.assignmentId,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    where: {
+      id: parsedData.data.userId,
+    },
+  });
+
+  if (!user?.teacher?.courses[0]?.assignments[0]) {
+    return res.status(403).json({
+      message:
+        'You do not have access to this assignment or you cannot edit the assignment',
+    });
+  }
+
+  const { userId, assignmentId, ...newAssignmentData } = parsedData.data;
+
+  await prisma.assignment.update({
+    where: {
+      id: assignmentId,
+    },
+    data: newAssignmentData,
+  });
+
+  return res.status(204).json({
+    message: 'Assignment updated successfully.',
+  });
+};
+
+export { allAssignments, getAssignment, updateAssignment };

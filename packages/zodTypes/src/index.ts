@@ -32,3 +32,16 @@ export const GetAssignmentSchema = z.object({
     .string({ required_error: 'Course ID is required' })
     .uuid({ message: 'Invalid Assignment ID' }),
 });
+
+export const UpdateAssignmentSchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid User ID' }),
+  assignmentId: z
+    .string({ required_error: 'Course ID is required' })
+    .uuid({ message: 'Invalid Assignment ID' }),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  dueDate: z.string().optional(),
+  markingScript: z.string().url().optional(),
+  requiredFiles: z.string().url().optional(),
+  maxMarks: z.number().optional(),
+});
