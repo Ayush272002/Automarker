@@ -36,7 +36,7 @@ export function LoginCard() {
           </Card>
         </motion.div>
       </Link>
-      <Link href="/teacher/login">
+      <Link href="/marker/login">
         <motion.div
           whileHover={{
             scale: 1.05,
