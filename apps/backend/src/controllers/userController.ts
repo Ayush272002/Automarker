@@ -65,9 +65,9 @@ const createUser = async (req: Request, res: Response) => {
     );
 
     res.cookie('jwt', token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: 'none',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -133,9 +133,9 @@ const signin = async (req: Request, res: Response) => {
   );
 
   res.cookie('jwt', token, {
-    httpOnly: false,
-    secure: false,
-    sameSite: 'none',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
