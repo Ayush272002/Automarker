@@ -43,7 +43,7 @@ const getDashboard = async (req: Request, res: Response) => {
       ),
     }));
 
-    res.json(courses);
+    res.status(200).json(courses);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to fetch courses' });
@@ -102,7 +102,7 @@ const getStats = async (req: Request, res: Response) => {
       0
     );
 
-    res.json({
+    res.status(200).json({
       totalCourses,
       totalStudents,
       totalSubmissions,
