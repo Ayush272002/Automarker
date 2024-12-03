@@ -12,22 +12,21 @@ import { Loader2 } from 'lucide-react';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function CoursePage() {
-  const { courseId } = useParams(); // Use courseId from the URL params
-  const [assignments, setAssignments] = useState<any[]>([]); // State to store fetched assignments
-  const [loading, setLoading] = useState(true); // State to handle loading
-  const [error, setError] = useState<string | null>(null); // State to handle error
+  const { courseId } = useParams();
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!courseId) return;
 
     const fetchCourseData = async () => {
       try {
-        // Fetch assignments data from the backend API
         const response = await axios.get(
           `${API_BASE_URL}/api/v1/assignments/all`,
           {
             params: { courseId },
-            withCredentials: true, // Make sure cookies are sent with the request
+            withCredentials: true,
           }
         );
         setAssignments(response.data);
