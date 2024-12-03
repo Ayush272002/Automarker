@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   allAssignments,
+  createAssignment,
   getAssignment,
   updateAssignment,
 } from '../controllers/assignmentController';
@@ -14,5 +15,7 @@ router
   .route('/:id')
   .get(authMiddleware, getAssignment)
   .patch(authMiddleware, updateAssignment);
+
+router.post('/', authMiddleware, createAssignment);
 
 export const assignmentRouter = router;

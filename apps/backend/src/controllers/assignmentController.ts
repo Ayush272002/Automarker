@@ -8,79 +8,72 @@ import { Request, Response } from 'express';
 
 const allAssignments = async (req: Request, res: Response) => {
   try {
-    const body = req.body;
-    const parsedData = AllAssignmentsSchema.safeParse(body);
+    const courseId = req.query.courseId as string; // Assuming courseId is passed as a query parameter.
+    const userId = req.body.userId;
 
-    if (!parsedData.success) {
-      return res.status(411).json({
-        message: parsedData.error.errors.map((err) => err.message).join(', '),
+    if (!courseId || !userId) {
+      return res.status(400).json({
+        message: 'Course ID and User ID are required.',
       });
     }
 
     const user = await prisma.user.findFirst({
+      where: { id: userId },
       include: {
-        student: {
-          include: {
-            courses: {
-              select: {
-                id: true,
-                assignments: {
-                  select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                  },
-                },
-              },
-            },
-          },
-        },
         teacher: {
           include: {
             courses: {
+              where: { id: courseId },
               select: {
-                id: true,
                 assignments: {
                   select: {
                     id: true,
                     title: true,
                     description: true,
+                    dueDate: true,
                   },
                 },
               },
             },
           },
         },
-      },
-      where: {
-        id: parsedData.data.userId,
+        student: {
+          include: {
+            courses: {
+              where: { id: courseId },
+              select: {
+                assignments: {
+                  select: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    dueDate: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
     if (!user) {
       return res.status(403).json({
-        message: 'User not found',
+        message: 'User not authorized or course not found.',
       });
     }
 
-    let course = user.student?.courses.find(
-      ({ id }) => id === parsedData.data.courseId
-    );
-    if (!course) {
-      course = user.teacher?.courses.find(
-        ({ id }) => id === parsedData.data.courseId
-      );
-    }
+    const assignments =
+      user.teacher?.courses[0]?.assignments ||
+      user.student?.courses[0]?.assignments;
 
-    if (!course) {
-      return res.status(403).json({
-        message: 'You do not have access to this course.',
+    if (!assignments) {
+      return res.status(404).json({
+        message: 'No assignments found for this course.',
       });
     }
 
-    return res.status(200).json({
-      assignments: course.assignments,
-    });
+    return res.status(200).json(assignments);
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -213,4 +206,48 @@ const updateAssignment = async (req: Request, res: Response) => {
   });
 };
 
-export { allAssignments, getAssignment, updateAssignment };
+const createAssignment = async (req: Request, res: Response) => {
+  const { title, description, dueDate, maxMarks, courseId, markingScript } =
+    req.body;
+
+  if (!title || !dueDate || !maxMarks || !courseId) {
+    return res.status(400).json({
+      message: 'Title, dueDate, maxMarks, and courseId are required.',
+    });
+  }
+
+  try {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        message: 'Course not found.',
+      });
+    }
+
+    const newAssignment = await prisma.assignment.create({
+      data: {
+        title,
+        description,
+        dueDate: new Date(dueDate),
+        maxMarks: parseInt(maxMarks, 10),
+        courseId,
+        markingScript,
+      },
+    });
+
+    return res.status(201).json({
+      message: 'Assignment created successfully.',
+      assignment: newAssignment,
+    });
+  } catch (error) {
+    console.error('Error creating assignment:', error);
+    return res.status(500).json({
+      message: 'Internal server error.',
+    });
+  }
+};
+
+export { allAssignments, getAssignment, updateAssignment, createAssignment };
