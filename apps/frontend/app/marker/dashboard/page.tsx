@@ -7,10 +7,13 @@ import { ClipboardList, CheckSquare, FileCheck, User } from 'lucide-react';
 import Link from 'next/link';
 import { Course } from 'types/Course';
 import { Stats } from 'types/Stats';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function MarkerDashboard() {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalCourses: 0,
@@ -31,6 +34,12 @@ export default function MarkerDashboard() {
           }),
         ]);
 
+        if (coursesRes.status === 403 || statsRes.status === 403) {
+          router.push('/');
+          toast.error('You are not authorized to access this page');
+          return;
+        }
+
         if (!coursesRes.ok || !statsRes.ok) {
           throw new Error('Failed to fetch data');
         }
@@ -41,6 +50,7 @@ export default function MarkerDashboard() {
         setCourses(coursesData);
         setStats(statsData);
       } catch (error) {
+        toast.error('Failed to fetch data');
         console.error(error);
       }
     }
@@ -51,7 +61,7 @@ export default function MarkerDashboard() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
       <motion.div
-        className="absolute inset-0 bg-grid-pattern opacity-5"
+        className="absolute inset-0 bg-grid-pattern opacity-5 -z-10"
         style={{
           backgroundImage:
             'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
@@ -160,30 +170,45 @@ export default function MarkerDashboard() {
         <h3 className="mt-8 text-xl font-bold">My Courses</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           {courses.map((course) => (
-            <Card key={course.id} className="bg-gray-800 text-white">
-              <CardHeader>
-                <CardTitle>{course.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <p>
-                    <span className="font-semibold">Students:</span>{' '}
-                    {course.studentCount}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Submitted:</span>{' '}
-                    {course.submitted}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Not Submitted:</span>{' '}
-                    {course.notSubmitted}
-                  </p>
-                </div>
-                <Button variant="link" className="mt-4" asChild>
-                  <Link href={`/marker/courses/${course.id}`}>View Course</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <div key={course.id}>
+              <Card className="bg-gray-800 text-white">
+                <CardHeader>
+                  <CardTitle>{course.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <p>
+                      <span className="font-semibold">Students:</span>{' '}
+                      {course.studentCount}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Submitted:</span>{' '}
+                      {course.submitted}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Not Submitted:</span>{' '}
+                      {course.notSubmitted}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex m-1 items-center space-between">
+                    <Link
+                      href={`/marker/course/${course.id}/publish`}
+                      className="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-3"
+                    >
+                      Publish Assignment
+                    </Link>
+
+                    <Link
+                      href={`/marker/course/${course.id}`}
+                      className="block w-full text-center bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                    >
+                      View Assignments
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       </motion.main>
