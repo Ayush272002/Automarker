@@ -191,12 +191,19 @@ export default function MarkerDashboard() {
                     </p>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 flex m-1 items-center space-between">
                     <Link
                       href={`/marker/course/${course.id}/publish`}
-                      className="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                      className="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-3"
                     >
                       Publish Assignment
+                    </Link>
+
+                    <Link
+                      href={`/marker/course/${course.id}`}
+                      className="block w-full text-center bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                    >
+                      View Assignments
                     </Link>
                   </div>
                 </CardContent>
