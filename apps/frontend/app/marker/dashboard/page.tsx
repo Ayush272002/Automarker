@@ -61,7 +61,7 @@ export default function MarkerDashboard() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
       <motion.div
-        className="absolute inset-0 bg-grid-pattern opacity-5"
+        className="absolute inset-0 bg-grid-pattern opacity-5 -z-10"
         style={{
           backgroundImage:
             'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
