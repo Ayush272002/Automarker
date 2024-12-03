@@ -193,7 +193,7 @@ export default function MarkerDashboard() {
 
                   <div className="mt-4">
                     <Link
-                      href={`/marker/courses/${course.id}/publish`}
+                      href={`/marker/course/${course.id}/publish`}
                       className="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                     >
                       Publish Assignment
