@@ -1,5 +1,5 @@
 import kafkaClient from '@repo/kafka/client';
-import { SUBMIT } from '@repo/topics/topic';
+import { SUBMIT } from '@repo/topics/topics';
 
 const topic = SUBMIT;
 

@@ -5,11 +5,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "exports": {
+    "./topics": "./src/index.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "exports": {
-    "./topic": "./src/index.ts"
-  }
+  "dependencies": {}
 }

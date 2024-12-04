@@ -10,6 +10,8 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
+router.post('/', authMiddleware, createAssignment);
+
 router.get('/all', authMiddleware, allAssignments);
 
 router
@@ -17,7 +19,7 @@ router
   .get(authMiddleware, getAssignment)
   .patch(authMiddleware, updateAssignment);
 
-router.post('/', authMiddleware, createAssignment);
+router.post('/:id/submit', authMiddleware, submitAssignment);
 
 router.post('/:id/submit', authMiddleware, submitAssignment);
 

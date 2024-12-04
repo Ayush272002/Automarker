@@ -2,11 +2,13 @@ import prisma from '@repo/db/client';
 import {
   AllAssignmentsSchema,
   GetAssignmentSchema,
+  SubmitAssignmentSchema,
   UpdateAssignmentSchema,
 } from '@repo/zodtypes/user-types';
 import { Request, Response } from 'express';
 import kafkaClient from '@repo/kafka/client';
-import { SUBMIT } from '@repo/topics/topic';
+import { SUBMIT } from '@repo/topics/topics';
+import { RedisManager } from '../utils/redisManager';
 
 const allAssignments = async (req: Request, res: Response) => {
   try {
@@ -208,6 +210,107 @@ const updateAssignment = async (req: Request, res: Response) => {
   });
 };
 
+const submitAssignment = async (req: Request, res: Response) => {
+  const body = req.body;
+  const assignmentId = req.params.id;
+  const parsedData = SubmitAssignmentSchema.safeParse({
+    ...body,
+    assignmentId,
+  });
+
+  if (!parsedData.success) {
+    return res.status(411).json({
+      message: parsedData.error.errors.map((err) => err.message).join(','),
+    });
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: parsedData.data.userId,
+    },
+    select: {
+      student: {
+        select: {
+          id: true,
+          courses: {
+            select: {
+              assignments: {
+                where: {
+                  id: parsedData.data.assignmentId,
+                },
+                select: {
+                  markingScript: true,
+                  requiredFiles: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user?.student?.courses[0]?.assignments[0]) {
+    return res.status(403).json({
+      message:
+        'You do not have access to this assignment or you cannot send a submission to this assignment.',
+    });
+  }
+
+  const assignmentZip = parsedData.data.assignmentZip;
+  const payload = {
+    markingScript: user.student.courses[0].assignments[0].markingScript,
+    requiredFiles: user.student.courses[0].assignments[0].requiredFiles,
+    studentId: parsedData.data.userId,
+    assignmentId: parsedData.data.assignmentId,
+  };
+
+  await prisma.submission.create({
+    data: {
+      assignmentZip,
+      assignment: {
+        connect: {
+          id: parsedData.data.assignmentId,
+        },
+      },
+      student: {
+        connect: {
+          id: user.student.id,
+        },
+      },
+      submissionOutbox: {
+        create: {
+          eventType: 'queued',
+          payload: JSON.stringify(payload),
+        },
+      },
+    },
+  });
+
+  await kafkaClient.createTopic(SUBMIT);
+  const producer = kafkaClient.getInstance().producer();
+  await producer.connect();
+
+  producer.send({
+    topic: SUBMIT,
+    messages: [{ value: JSON.stringify(payload) }],
+  });
+
+  await producer.disconnect();
+
+  const redisManager = RedisManager.getInstance();
+  let sentResponse = false;
+  redisManager.subscribe(SUBMIT, (message) => {
+    if (sentResponse) return;
+
+    console.log(message);
+  });
+
+  return res.status(200).json({
+    message: 'Marking complete.',
+  });
+};
+
 const createAssignment = async (req: Request, res: Response) => {
   const { title, description, dueDate, maxMarks, courseId, markingScript } =
     req.body;
@@ -249,75 +352,6 @@ const createAssignment = async (req: Request, res: Response) => {
     return res.status(500).json({
       message: 'Internal server error.',
     });
-  }
-};
-
-const submitAssignment = async (req: Request, res: Response) => {
-  try {
-    const { id: assignmentId } = req.params;
-    const { fileUrl } = req.body;
-    const userId = req.body.userId;
-
-    if (!assignmentId) {
-      return res.status(400).json({ message: 'Assignment ID is required.' });
-    }
-
-    if (!fileUrl) {
-      return res.status(400).json({ message: 'File URL is required.' });
-    }
-
-    const student = await prisma.student.findFirst({
-      where: { userId },
-      include: {
-        courses: {
-          include: {
-            assignments: {
-              where: { id: assignmentId },
-            },
-          },
-        },
-      },
-    });
-
-    if (!student || !student.courses[0]?.assignments[0]) {
-      return res
-        .status(403)
-        .json({ message: 'Unauthorized or invalid assignment.' });
-    }
-
-    const submission = await prisma.submission.create({
-      data: {
-        assignmentId,
-        studentId: student.id,
-        assignmentZip: fileUrl,
-      },
-    });
-
-    const kafka = kafkaClient.getInstance();
-    const producer = kafka.producer();
-    await producer.connect();
-    await producer.send({
-      topic: SUBMIT,
-      messages: [
-        {
-          value: JSON.stringify({
-            submissionId: submission.id,
-            studentId: submission.studentId,
-            assignmentId: submission.assignmentId,
-            fileUrl: submission.assignmentZip,
-            submittedAt: submission.submittedAt,
-          }),
-        },
-      ],
-    });
-    await producer.disconnect();
-
-    return res
-      .status(201)
-      .json({ message: 'Assignment submitted successfully.', submission });
-  } catch (error) {
-    console.error('Error submitting assignment:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
   }
 };
 

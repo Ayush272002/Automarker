@@ -1,1 +1,1 @@
-export const SUBMIT = 'assignment-submissions';
+export const SUBMIT = 'submit';
