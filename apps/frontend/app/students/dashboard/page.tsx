@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import {
   Button,
   Card,
@@ -12,12 +14,40 @@ import {
 import { CalendarDays, ClipboardList, Home, User } from 'lucide-react';
 import Link from 'next/link';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+type Course = {
+  id: string;
+  name: string;
+  description?: string;
+  moduleLead?: string;
+  progress?: number;
+};
+
 export default function StudentDashboard() {
-  const courses = [
-    { name: 'Mathematics', instructor: 'Dr. John Doe', progress: 75 },
-    { name: 'Physics', instructor: 'Dr. Jane Smith', progress: 50 },
-    { name: 'Chemistry', instructor: 'Dr. Emily Johnson', progress: 60 },
-  ];
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/v1/students/courses`,
+        {
+          withCredentials: true,
+        }
+      );
+      setCourses(response.data.courses);
+    } catch (err) {
+      setError('Failed to fetch courses. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   const overviewItems = [
     {
@@ -132,41 +162,50 @@ export default function StudentDashboard() {
         </div>
 
         <h3 className="mt-8 text-xl font-bold">My Courses</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-          {courses.map((course, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + index * 0.1 }}
-            >
-              <Card className="bg-gray-800 text-white">
-                <CardHeader>
-                  <CardTitle>{course.name}</CardTitle>
-                  <p className="text-sm text-gray-400">
-                    Instructor: {course.instructor}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative w-full">
-                    <Progress value={course.progress} className="bg-gray-700" />
-                    <span className="absolute inset-0 flex items-center justify-center text-sm text-gray-200">
-                      {course.progress}% Complete
-                    </span>
-                  </div>
-                  <Link href={`/students/courses/${course.name.toLowerCase()}`}>
-                    <Button
-                      variant="outline"
-                      className="mt-4 text-blue-400 hover:text-blue-500"
-                    >
-                      Go to Course
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+            {courses.map((course, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+              >
+                <Card className="bg-gray-800 text-white">
+                  <CardHeader>
+                    <CardTitle>{course.name}</CardTitle>
+                    <p className="text-sm text-gray-400">
+                      Instructor: {course.moduleLead || 'N/A'}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative w-full">
+                      <Progress
+                        value={Math.random() * 100} // Replace with real progress when available
+                        className="bg-gray-700"
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center text-sm text-gray-200">
+                        75% Complete
+                      </span>
+                    </div>
+                    <Link href={`/students/courses/${course.id}`}>
+                      <Button
+                        variant="outline"
+                        className="mt-4 text-blue-400 hover:text-blue-500"
+                      >
+                        Go to Course
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.main>
     </div>
   );

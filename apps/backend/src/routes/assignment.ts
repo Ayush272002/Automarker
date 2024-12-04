@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   allAssignments,
+  createAssignment,
   getAssignment,
   submitAssignment,
   updateAssignment,
@@ -8,6 +9,8 @@ import {
 import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
+
+router.post('/', authMiddleware, createAssignment);
 
 router.get('/all', authMiddleware, allAssignments);
 
