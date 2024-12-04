@@ -45,3 +45,13 @@ export const UpdateAssignmentSchema = z.object({
   requiredFiles: z.string().url().optional(),
   maxMarks: z.number().optional(),
 });
+
+export const SubmitAssignmentSchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid User ID' }),
+  assignmentId: z
+    .string({ required_error: 'Course ID is required' })
+    .uuid({ message: 'Invalid Assignment ID' }),
+  assignmentZip: z
+    .string({ required_error: 'Assignment Zip link is required' })
+    .url({ message: 'Invalid Assignment Zip URL' }),
+});
