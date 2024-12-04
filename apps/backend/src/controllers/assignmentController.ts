@@ -6,7 +6,7 @@ import {
   UpdateAssignmentSchema,
 } from '@repo/zodtypes/user-types';
 import { Request, Response } from 'express';
-import kafkaClient from '../../../../packages/kafka/src';
+import kafkaClient from '@repo/kafka/client';
 import { SUBMIT } from '@repo/topics/topics';
 import { RedisManager } from '../utils/redisManager';
 
@@ -355,4 +355,10 @@ const createAssignment = async (req: Request, res: Response) => {
   }
 };
 
-export { allAssignments, getAssignment, updateAssignment, createAssignment, submitAssignment };
+export {
+  allAssignments,
+  getAssignment,
+  updateAssignment,
+  createAssignment,
+  submitAssignment,
+};
