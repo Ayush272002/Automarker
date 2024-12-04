@@ -103,17 +103,19 @@ export default function CoursePage() {
                 transition={{ delay: 0.2 + index * 0.1 }}
                 className="cursor-pointer"
               >
-                <Card className="bg-gray-800 text-white transform hover:shadow-xl">
-                  <CardHeader>
-                    <CardTitle>{assignment.title}</CardTitle>
-                    <p className="text-sm text-gray-400">
-                      Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <p>{assignment.description}</p>
-                  </CardContent>
-                </Card>
+                <Link href={`/students/assignments/${assignment.id}`}>
+                  <Card className="bg-gray-800 text-white transform hover:shadow-xl">
+                    <CardHeader>
+                      <CardTitle>{assignment.title}</CardTitle>
+                      <p className="text-sm text-gray-400">
+                        Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <p>{assignment.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
               </motion.div>
             ))}
           </div>
