@@ -3,6 +3,7 @@ import {
   allAssignments,
   createAssignment,
   getAssignment,
+  submitAssignment,
   updateAssignment,
 } from '../controllers/assignmentController';
 import { authMiddleware } from '../middlewares/authMiddleware';
@@ -17,5 +18,7 @@ router
   .patch(authMiddleware, updateAssignment);
 
 router.post('/', authMiddleware, createAssignment);
+
+router.post('/:id/submit', authMiddleware, submitAssignment);
 
 export const assignmentRouter = router;

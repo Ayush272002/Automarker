@@ -5,6 +5,8 @@ import {
   UpdateAssignmentSchema,
 } from '@repo/zodtypes/user-types';
 import { Request, Response } from 'express';
+import kafkaClient from '@repo/kafka/client';
+import { SUBMIT } from '@repo/topics/topic';
 
 const allAssignments = async (req: Request, res: Response) => {
   try {
@@ -250,4 +252,79 @@ const createAssignment = async (req: Request, res: Response) => {
   }
 };
 
-export { allAssignments, getAssignment, updateAssignment, createAssignment };
+const submitAssignment = async (req: Request, res: Response) => {
+  try {
+    const { id: assignmentId } = req.params;
+    const { fileUrl } = req.body;
+    const userId = req.body.userId;
+
+    if (!assignmentId) {
+      return res.status(400).json({ message: 'Assignment ID is required.' });
+    }
+
+    if (!fileUrl) {
+      return res.status(400).json({ message: 'File URL is required.' });
+    }
+
+    const student = await prisma.student.findFirst({
+      where: { userId },
+      include: {
+        courses: {
+          include: {
+            assignments: {
+              where: { id: assignmentId },
+            },
+          },
+        },
+      },
+    });
+
+    if (!student || !student.courses[0]?.assignments[0]) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized or invalid assignment.' });
+    }
+
+    const submission = await prisma.submission.create({
+      data: {
+        assignmentId,
+        studentId: student.id,
+        assignmentZip: fileUrl,
+      },
+    });
+
+    const kafka = kafkaClient.getInstance();
+    const producer = kafka.producer();
+    await producer.connect();
+    await producer.send({
+      topic: SUBMIT,
+      messages: [
+        {
+          value: JSON.stringify({
+            submissionId: submission.id,
+            studentId: submission.studentId,
+            assignmentId: submission.assignmentId,
+            fileUrl: submission.assignmentZip,
+            submittedAt: submission.submittedAt,
+          }),
+        },
+      ],
+    });
+    await producer.disconnect();
+
+    return res
+      .status(201)
+      .json({ message: 'Assignment submitted successfully.', submission });
+  } catch (error) {
+    console.error('Error submitting assignment:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+export {
+  allAssignments,
+  getAssignment,
+  updateAssignment,
+  createAssignment,
+  submitAssignment,
+};
