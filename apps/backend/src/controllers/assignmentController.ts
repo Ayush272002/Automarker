@@ -300,7 +300,7 @@ const submitAssignment = async (req: Request, res: Response) => {
 
   const redisManager = RedisManager.getInstance();
   let sentResponse = false;
-  redisManager.subscribe(SUBMIT, (message) => {
+  redisManager.subscribe(SUBMIT, (message: any) => {
     if (sentResponse) return;
 
     console.log(message);
@@ -355,10 +355,51 @@ const createAssignment = async (req: Request, res: Response) => {
   }
 };
 
+const getSubmissionStatus = async (req: Request, res: Response) => {
+  console.log('control here');
+  const assignmentId = req.params.id;
+  const userId = req.body.userId;
+
+  try {
+    const submission = await prisma.submission.findFirst({
+      where: {
+        assignmentId,
+        studentId: userId,
+      },
+      select: {
+        submittedAt: true,
+        marksAchieved: true,
+        logs: true,
+      },
+    });
+
+    if (!submission) {
+      return res.status(200).json({ status: 'unsubmitted' });
+    }
+
+    if (submission.marksAchieved === -1) {
+      return res
+        .status(200)
+        .json({ status: 'submitted', logs: submission.logs });
+    }
+
+    console.log(submission);
+    return res.status(200).json({
+      status: 'marked',
+      marksAchieved: submission.marksAchieved,
+      logs: submission.logs,
+    });
+  } catch (error) {
+    console.error('Error fetching submission status:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
 export {
   allAssignments,
   getAssignment,
   updateAssignment,
   createAssignment,
   submitAssignment,
+  getSubmissionStatus,
 };
