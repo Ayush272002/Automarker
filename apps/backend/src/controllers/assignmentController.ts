@@ -356,15 +356,33 @@ const createAssignment = async (req: Request, res: Response) => {
 };
 
 const getSubmissionStatus = async (req: Request, res: Response) => {
-  console.log('control here');
   const assignmentId = req.params.id;
   const userId = req.body.userId;
 
   try {
+    const student = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        student: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!student?.student) {
+      return res.status(403).json({ message: 'User not authorized.' });
+    }
+
+    const studentId = student.student.id;
+
     const submission = await prisma.submission.findFirst({
       where: {
         assignmentId,
-        studentId: userId,
+        studentId,
       },
       select: {
         submittedAt: true,
@@ -378,14 +396,15 @@ const getSubmissionStatus = async (req: Request, res: Response) => {
     }
 
     if (submission.marksAchieved === -1) {
-      return res
-        .status(200)
-        .json({ status: 'submitted', logs: submission.logs });
+      return res.status(200).json({
+        status: 'submitted',
+        message: 'Submission is under evaluation.',
+        logs: submission.logs,
+      });
     }
 
-    console.log(submission);
     return res.status(200).json({
-      status: 'marked',
+      status: 'graded',
       marksAchieved: submission.marksAchieved,
       logs: submission.logs,
     });

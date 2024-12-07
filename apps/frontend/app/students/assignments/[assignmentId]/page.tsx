@@ -50,7 +50,6 @@ export default function AssignmentPage() {
           }
         );
 
-        console.log(submissionResponse.data);
         setSubmission(submissionResponse.data);
       } catch (err) {
         setError('Error fetching assignment details');
@@ -147,20 +146,19 @@ export default function AssignmentPage() {
           <p className="mt-2 text-gray-300">{assignment.description}</p>
         </div>
 
-        {submission ? (
+        {submission?.status === 'graded' ? (
           <div className="mt-4 p-4 bg-green-800 rounded-lg shadow-lg">
-            {submission.marksAchieved >= 0 ? (
-              <p className="text-lg font-bold text-green-400">
-                Marks Achieved: {submission.marksAchieved} /{' '}
-                {assignment.maxMarks}
-              </p>
-            ) : (
-              <p className="text-lg font-bold text-yellow-400">
-                Assignment Submitted. Awaiting Grading.
-              </p>
-            )}
+            <p className="text-lg font-bold text-green-400">
+              Marks Achieved: {submission.marksAchieved} / {assignment.maxMarks}
+            </p>
           </div>
-        ) : (
+        ) : submission?.status === 'submitted' ? (
+          <div className="mt-4 p-4 bg-yellow-800 rounded-lg shadow-lg">
+            <p className="text-lg font-bold text-yellow-400">
+              Assignment Submitted. Awaiting Grading.
+            </p>
+          </div>
+        ) : submission?.status === 'unsubmitted' ? (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <motion.button
@@ -223,7 +221,7 @@ export default function AssignmentPage() {
               <DialogFooter></DialogFooter>
             </DialogContent>
           </Dialog>
-        )}
+        ) : null}
       </motion.main>
 
       <footer className="p-6 bg-gray-900 text-center text-gray-400">

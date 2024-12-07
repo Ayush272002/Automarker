@@ -29,7 +29,7 @@ export class RedisManager {
     await subscriber.connect();
 
     subscriber.subscribe(channel, (message) => {
-      //console.log(`Received message: ${message}`);
+      console.log(`Received message: ${message}`);
       callback(message);
     });
   }
