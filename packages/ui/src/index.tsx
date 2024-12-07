@@ -1,10 +1,10 @@
 import '../styles/globals.css';
 
-export * from './button';
-export * from './card';
-export * from './code';
-export * from './input-box';
+export * from './components/ui/avatar';
 export * from './components/ui/button';
-export * from './components/login';
-export * from './components/register';
-export * from './components/fileInput';
+export * from './components/ui/card';
+export * from './components/ui/dialog';
+export * from './components/ui/input';
+export * from './components/ui/label';
+export * from './components/ui/progress';
+export * from './components/ui/select';

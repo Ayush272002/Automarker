@@ -67,11 +67,11 @@ const createUser = async (req: Request, res: Response) => {
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       message: 'User created successfully',
     });
   } catch (error) {
@@ -135,7 +135,7 @@ const signin = async (req: Request, res: Response) => {
   res.cookie('jwt', token, {
     httpOnly: true,
     secure: true,
-    sameSite: userType === 'STUDENT' ? 'lax' : 'strict',
+    sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -167,4 +167,45 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
-export { createUser, signin, logout };
+const getAllCourses = async (req: Request, res: Response) => {
+  try {
+    const userId = req.body.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        teacher: {
+          include: {
+            courses: true,
+          },
+        },
+        student: {
+          include: {
+            courses: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const courses = [
+      ...(user.teacher?.courses || []),
+      ...(user.student?.courses || []),
+    ];
+
+    const courseDetails = courses.map((course) => ({
+      id: course.id,
+      name: course.name,
+    }));
+
+    return res.status(200).json({ courses: courseDetails });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export { createUser, signin, logout, getAllCourses };

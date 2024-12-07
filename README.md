@@ -34,7 +34,7 @@ This Turborepo has some additional tools already setup for you:
 
 ### Clone
 
-To clone the repo run 
+To clone the repo run
 
 ```shell
 git clone https://github.com/Ayush272002/Turborepo-Template.git
