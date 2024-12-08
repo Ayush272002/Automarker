@@ -79,12 +79,6 @@ export default function StudentLoginPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-purple-800 via-purple-600 to-pink-600">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.1 }}
-        className="absolute inset-0 bg-grid-white/10 [mask-image:radial-gradient(ellipse_at_center,transparent_30%,black)]"
-      />
-
       <Link
         href="/"
         className="absolute left-4 top-4 text-sm text-gray-300 hover:text-white transition-colors md:left-8 md:top-8 group"
@@ -93,7 +87,7 @@ export default function StudentLoginPage() {
           initial={{ x: -10, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="flex items-center"
+          className="flex items-center my-2"
         >
           <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Home
@@ -190,12 +184,12 @@ export default function StudentLoginPage() {
               transition={{ delay: 0.6 }}
               className="mt-4 text-center text-sm"
             >
-              <Link
-                href="/forgot-password"
-                className="text-gray-200 hover:text-white transition-colors hover:underline"
+              <div
+                className="text-gray-200 hover:text-white transition-colors hover:underline cursor-pointer"
+                onClick={() => toast.error('Feature coming soon.')}
               >
                 Forgot password?
-              </Link>
+              </div>
             </motion.div>
           </CardContent>
         </Card>
@@ -209,7 +203,7 @@ export default function StudentLoginPage() {
           Don&apos;t have an account?{' '}
           <Link
             href="/students/signup"
-            className="text-pink-300 hover:text-pink-200 transition-colors hover:underline"
+            className="text-pink-300 hover:text-pink-200 transition-all hover:underline hover:text-lg ease-in-out"
           >
             Register here
           </Link>

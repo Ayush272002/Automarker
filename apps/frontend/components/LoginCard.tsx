@@ -21,7 +21,7 @@ export function LoginCard() {
           whileTap={{ scale: 0.95 }}
           className="transition-transform"
         >
-          <Card className="transition-colors hover:bg-muted/50 rounded-xl">
+          <Card className="transition-colors rounded-xl">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl">Student Login</CardTitle>
               <CardDescription>
@@ -45,7 +45,7 @@ export function LoginCard() {
           whileTap={{ scale: 0.95 }}
           className="transition-transform"
         >
-          <Card className="transition-colors hover:bg-muted/50 rounded-xl">
+          <Card className="transition-colors rounded-xl">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl">Teacher Login</CardTitle>
               <CardDescription>Manage assignments and grading</CardDescription>
