@@ -42,7 +42,8 @@ export default function Page() {
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            © {new Date().getFullYear()} University Name. All rights reserved.
+            © {new Date().getFullYear()} University of Birmingham. All rights
+            reserved.
           </motion.p>
           <motion.nav
             className="flex gap-4"
