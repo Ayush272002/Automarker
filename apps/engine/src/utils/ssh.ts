@@ -1,5 +1,8 @@
 import fs from 'fs';
 import { NodeSSH } from 'node-ssh';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const ssh = new NodeSSH();
 
@@ -8,7 +11,9 @@ export async function sshIntoEC2() {
     const privateKeyPath = process.env.PRIVATE_KEY as string;
     const privateKey = fs.readFileSync(privateKeyPath, 'utf-8');
     const host = process.env.HOST as string;
-    const username = process.env.USERNAME as string;
+    const username = 'ubuntu';
+
+    console.log(host, username, privateKey);
 
     console.log('Connecting to EC2 instance...');
     await ssh.connect({

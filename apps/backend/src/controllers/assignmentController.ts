@@ -263,6 +263,7 @@ const submitAssignment = async (req: Request, res: Response) => {
     requiredFiles: user.student.courses[0].assignments[0].requiredFiles,
     userId: parsedData.data.userId,
     assignmentId: parsedData.data.assignmentId,
+    uploadLink: parsedData.data.assignmentZip,
   };
 
   await prisma.submission.create({

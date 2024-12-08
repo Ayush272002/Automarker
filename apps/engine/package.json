@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "@repo/kafka": "*",
+    "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "esbuild": "^0.24.0",
     "node-ssh": "^13.2.0"
