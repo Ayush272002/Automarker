@@ -261,7 +261,7 @@ const submitAssignment = async (req: Request, res: Response) => {
   const payload = {
     markingScript: user.student.courses[0].assignments[0].markingScript,
     requiredFiles: user.student.courses[0].assignments[0].requiredFiles,
-    studentId: parsedData.data.userId,
+    userId: parsedData.data.userId,
     assignmentId: parsedData.data.assignmentId,
   };
 
