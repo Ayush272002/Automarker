@@ -2,8 +2,23 @@ import { NodeSSH } from 'node-ssh';
 import fs from 'fs';
 import prisma from '@repo/db/client';
 
+async function convertLineEndings(ssh: NodeSSH, filePath: string) {
+  const result = await ssh.execCommand(`
+    if command -v dos2unix >/dev/null 2>&1; then
+      dos2unix ${filePath}
+    else
+      sed -i 's/\r$//' ${filePath}
+    fi
+  `);
+
+  if (result.code !== 0) {
+    console.error('Failed to convert line endings:', result.stderr);
+    throw new Error('Failed to convert line endings');
+  }
+}
+
 export async function processSubmission(submission: any) {
-  const { assignmentId, uploadLink, markingScript } = submission;
+  const { assignmentId, uploadLink, markingScript, dockerFile } = submission;
 
   try {
     console.log('Setting up SSH connection...');
@@ -24,46 +39,64 @@ export async function processSubmission(submission: any) {
     console.log('Creating working directory on EC2...');
     await ssh.execCommand(`mkdir -p ${remoteWorkDir}`);
 
+    // Download and validate sol.js
     console.log('Downloading submission on EC2...');
-    const submissionFilePath = `${remoteWorkDir}/submission_file`;
-    const downloadSubmission = `curl -o ${submissionFilePath} '${uploadLink}'`;
+    const downloadSubmission = `curl -o ${remoteWorkDir}/sol.js '${uploadLink}'`;
     await ssh.execCommand(downloadSubmission);
-    console.log('Submission file downloaded successfully.');
 
+    const validateSubmission = `test -f ${remoteWorkDir}/sol.js && echo "File exists" || echo "File missing"`;
+    const submissionCheck = await ssh.execCommand(validateSubmission);
+    if (!submissionCheck.stdout.includes('File exists')) {
+      throw new Error('Failed to download sol.js');
+    }
+    console.log('Submission file downloaded and renamed to sol.js.');
+
+    // Download and validate mark.sh
     console.log('Downloading marking script...');
-    const markingScriptPath = `${remoteWorkDir}/mark.sh`;
-    const downloadMarkingScript = `curl -o ${markingScriptPath} '${markingScript}'`;
+    const downloadMarkingScript = `curl -o ${remoteWorkDir}/mark.sh '${markingScript}'`;
     await ssh.execCommand(downloadMarkingScript);
-    await ssh.execCommand(`chmod +x ${markingScriptPath}`);
-    console.log('Marking script downloaded and made executable.');
+    await ssh.execCommand(`chmod +x ${remoteWorkDir}/mark.sh`);
 
-    // Ensure the script has Unix line endings
-    await ssh.execCommand(`sed -i 's/\\r$//' ${markingScriptPath}`);
+    console.log('Converting line endings...');
+    await convertLineEndings(ssh, `${remoteWorkDir}/mark.sh`);
 
-    console.log('Creating Dockerfile...');
-    const dockerfileContent = `
-        FROM node:alpine
-        RUN apk add --no-cache bash
-        WORKDIR /app
-        COPY --chown=node:node submission_file ./mul.js
-        COPY --chown=node:node mark.sh ./mark.sh
-        RUN chmod +x mark.sh
-        CMD ["bash", "./mark.sh"]
-      `;
-
-    await ssh.execCommand(
-      `echo '${dockerfileContent}' > ${remoteWorkDir}/Dockerfile`
+    const validateMarkingScript = `test -f ${remoteWorkDir}/mark.sh && echo "File exists" || echo "File missing"`;
+    const markingScriptCheck = await ssh.execCommand(validateMarkingScript);
+    if (!markingScriptCheck.stdout.includes('File exists')) {
+      throw new Error('Failed to download mark.sh');
+    }
+    console.log(
+      'Marking script downloaded, made executable, and line endings converted.'
     );
-    console.log('Dockerfile created.');
 
+    // Download and validate Dockerfile
+    console.log('Downloading Dockerfile...');
+    const downloadDockerFile = `curl -o ${remoteWorkDir}/Dockerfile '${dockerFile}'`;
+    await ssh.execCommand(downloadDockerFile);
+
+    const validateDockerFile = `test -f ${remoteWorkDir}/Dockerfile && echo "File exists" || echo "File missing"`;
+    const dockerFileCheck = await ssh.execCommand(validateDockerFile);
+    if (!dockerFileCheck.stdout.includes('File exists')) {
+      throw new Error('Failed to download Dockerfile');
+    }
+    console.log('Dockerfile downloaded.');
+
+    // Build Docker image
     console.log('Building Docker image...');
     const imageName = `assignment_${assignmentId}:latest`;
     const buildCommand = `cd ${remoteWorkDir} && sudo docker build -t ${imageName} .`;
     const buildResult = await ssh.execCommand(buildCommand);
-    console.log('Build output:', buildResult.stdout);
-    if (buildResult.stderr) console.error('Build errors:', buildResult.stderr);
-    console.log(`Docker image ${imageName} built.`);
 
+    if (buildResult.code !== 0) {
+      console.error('Build errors:', buildResult.stderr);
+      throw new Error(
+        'Docker build failed. Check the Dockerfile or input files.'
+      );
+    }
+    console.log(`Docker image ${imageName} built successfully.`);
+    console.log('Build output:', buildResult.stdout, buildResult.stderr);
+
+    // Run Docker container
     console.log('Running Docker container...');
     const containerName = `assignment_${assignmentId}_container`;
     const runCommand = `sudo docker run --name ${containerName} ${imageName}`;
@@ -71,15 +104,14 @@ export async function processSubmission(submission: any) {
     console.log('Container output:', runResult.stdout);
     if (runResult.stderr) console.error('Container errors:', runResult.stderr);
 
+    // Process results
     console.log('Validating test results from container output...');
     const testsOutput = runResult.stdout || '';
-
     const passedTestsMatch = testsOutput.match(/Number of tests passed: (\d+)/);
-    // @ts-ignore
-    const passedTests = passedTestsMatch ? parseInt(passedTestsMatch[1]) : 0;
+    const passedTests = passedTestsMatch ? parseInt(passedTestsMatch[1]!) : 0;
     const totalTests = 4;
-
     const marks = Math.round((passedTests / totalTests) * 100);
+
     console.log(`Tests passed: ${passedTests}/${totalTests}`);
     console.log(`Marks calculated: ${marks}`);
 
@@ -116,3 +148,5 @@ export async function processSubmission(submission: any) {
     throw error;
   }
 }
+
+// sudo apt-get update && sudo apt-get install -y dos2unix
