@@ -2,7 +2,6 @@ import kafkaClient from '@repo/kafka/client';
 import { SUBMIT } from '@repo/topics/topics';
 import dotenv from 'dotenv';
 import { processSubmission } from './utils/submission';
-import { sshIntoEC2 } from './utils/ssh';
 
 dotenv.config();
 
@@ -36,4 +35,3 @@ async function consumeMessages() {
 }
 
 consumeMessages();
-// sshIntoEC2();
