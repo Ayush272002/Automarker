@@ -144,6 +144,19 @@ export default function AssignmentPage() {
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold">Description</h2>
           <p className="mt-2 text-gray-300">{assignment.description}</p>
+          {assignment.boilerplate && (
+            <p className="mt-2 text-blue-400">
+              This is the boilerplate code. You can download it from{' '}
+              <a
+                href={assignment.boilerplate}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                here ⬇️
+              </a>
+            </p>
+          )}
         </div>
 
         {submission?.status === 'graded' ? (

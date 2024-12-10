@@ -112,6 +112,7 @@ const getAssignment = async (req: Request, res: Response) => {
                   createdAt: true,
                   updatedAt: true,
                   maxMarks: true,
+                  boilerplate: true,
                 },
                 where: {
                   id: parsedData.data.assignmentId,
@@ -151,6 +152,7 @@ const getAssignment = async (req: Request, res: Response) => {
     });
   }
 
+  console.log(assignmentDescription);
   return res.status(200).json({ ...assignmentDescription });
 };
 
@@ -240,7 +242,7 @@ const submitAssignment = async (req: Request, res: Response) => {
                 },
                 select: {
                   markingScript: true,
-                  requiredFiles: true,
+                  dockerFile: true,
                 },
               },
             },
@@ -260,9 +262,10 @@ const submitAssignment = async (req: Request, res: Response) => {
   const assignmentZip = parsedData.data.assignmentZip;
   const payload = {
     markingScript: user.student.courses[0].assignments[0].markingScript,
-    requiredFiles: user.student.courses[0].assignments[0].requiredFiles,
-    studentId: parsedData.data.userId,
+    dockerFile: user.student.courses[0].assignments[0].dockerFile,
+    userId: parsedData.data.userId,
     assignmentId: parsedData.data.assignmentId,
+    uploadLink: parsedData.data.assignmentZip,
   };
 
   await prisma.submission.create({
@@ -312,8 +315,16 @@ const submitAssignment = async (req: Request, res: Response) => {
 };
 
 const createAssignment = async (req: Request, res: Response) => {
-  const { title, description, dueDate, maxMarks, courseId, markingScript } =
-    req.body;
+  const {
+    title,
+    description,
+    dueDate,
+    maxMarks,
+    courseId,
+    markingScript,
+    dockerFile,
+    boilerplate,
+  } = req.body;
 
   if (!title || !dueDate || !maxMarks || !courseId) {
     return res.status(400).json({
@@ -340,6 +351,8 @@ const createAssignment = async (req: Request, res: Response) => {
         maxMarks: parseInt(maxMarks, 10),
         courseId,
         markingScript,
+        dockerFile,
+        boilerplate,
       },
     });
 
