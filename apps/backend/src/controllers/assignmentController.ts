@@ -112,6 +112,7 @@ const getAssignment = async (req: Request, res: Response) => {
                   createdAt: true,
                   updatedAt: true,
                   maxMarks: true,
+                  boilerplate: true,
                 },
                 where: {
                   id: parsedData.data.assignmentId,
@@ -151,6 +152,7 @@ const getAssignment = async (req: Request, res: Response) => {
     });
   }
 
+  console.log(assignmentDescription);
   return res.status(200).json({ ...assignmentDescription });
 };
 
@@ -321,6 +323,7 @@ const createAssignment = async (req: Request, res: Response) => {
     courseId,
     markingScript,
     dockerFile,
+    boilerplate,
   } = req.body;
 
   if (!title || !dueDate || !maxMarks || !courseId) {
@@ -349,6 +352,7 @@ const createAssignment = async (req: Request, res: Response) => {
         courseId,
         markingScript,
         dockerFile,
+        boilerplate,
       },
     });
 

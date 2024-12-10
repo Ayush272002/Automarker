@@ -19,6 +19,7 @@ export default function PublishAssignment() {
   const [maxMarks, setMaxMarks] = useState('');
   const [markingScript, setMarkingScript] = useState<File | null>(null);
   const [dockerFile, setDockerFile] = useState<File | null>(null);
+  const [boilerPlateCode, setBoilerPlateCode] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const handleFileUpload = async (file: File): Promise<string | null> => {
@@ -43,8 +44,8 @@ export default function PublishAssignment() {
       return;
     }
 
-    if (!markingScript || !dockerFile) {
-      toast.error('Please upload both the Marking Script and Docker File.');
+    if (!markingScript || !dockerFile || !boilerPlateCode) {
+      toast.error('Please upload all the required files.');
       return;
     }
 
@@ -52,8 +53,9 @@ export default function PublishAssignment() {
     try {
       const markingScriptUrl = await handleFileUpload(markingScript);
       const dockerFileUrl = await handleFileUpload(dockerFile);
+      const boilerPlateCodeUrl = await handleFileUpload(boilerPlateCode);
 
-      if (!markingScriptUrl || !dockerFileUrl) {
+      if (!markingScriptUrl || !dockerFileUrl || !boilerPlateCodeUrl) {
         toast.error('File uploads failed. Please try again.');
         return;
       }
@@ -68,6 +70,7 @@ export default function PublishAssignment() {
           courseId,
           markingScript: markingScriptUrl,
           dockerFile: dockerFileUrl,
+          boilerplate: boilerPlateCodeUrl,
         },
         {
           withCredentials: true,
@@ -141,6 +144,15 @@ export default function PublishAssignment() {
               className="w-full p-2 rounded bg-gray-700 text-white"
               onChange={(e) => {
                 if (e.target.files?.[0]) setDockerFile(e.target.files[0]);
+              }}
+            />
+
+            <label className="block text-gray-400">Boiler Plate Code :</label>
+            <input
+              type="file"
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              onChange={(e) => {
+                if (e.target.files?.[0]) setBoilerPlateCode(e.target.files[0]);
               }}
             />
 

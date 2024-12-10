@@ -1,5 +1,6 @@
 import { NodeSSH } from 'node-ssh';
 import fs from 'fs';
+import path from 'path';
 import prisma from '@repo/db/client';
 
 async function convertLineEndings(ssh: NodeSSH, filePath: string) {
@@ -25,7 +26,7 @@ export async function processSubmission(submission: any) {
     const ssh = new NodeSSH();
 
     const host = process.env.HOST;
-    const username = 'ubuntu';
+    const username = process.env.AWS_USERNAME;
     const privateKey = fs.readFileSync(
       process.env.PRIVATE_KEY as string,
       'utf-8'
@@ -39,17 +40,21 @@ export async function processSubmission(submission: any) {
     console.log('Creating working directory on EC2...');
     await ssh.execCommand(`mkdir -p ${remoteWorkDir}`);
 
-    // Download and validate sol.js
+    // Extract original file extension from upload link
+    const fileExtension = path.extname(uploadLink);
+    const submissionFileName = `solution${fileExtension}`;
+
+    // Download submission with original extension
     console.log('Downloading submission on EC2...');
-    const downloadSubmission = `curl -o ${remoteWorkDir}/sol.js '${uploadLink}'`;
+    const downloadSubmission = `curl -o ${remoteWorkDir}/${submissionFileName} '${uploadLink}'`;
     await ssh.execCommand(downloadSubmission);
 
-    const validateSubmission = `test -f ${remoteWorkDir}/sol.js && echo "File exists" || echo "File missing"`;
+    const validateSubmission = `test -f ${remoteWorkDir}/${submissionFileName} && echo "File exists" || echo "File missing"`;
     const submissionCheck = await ssh.execCommand(validateSubmission);
     if (!submissionCheck.stdout.includes('File exists')) {
-      throw new Error('Failed to download sol.js');
+      throw new Error(`Failed to download ${submissionFileName}`);
     }
-    console.log('Submission file downloaded and renamed to sol.js.');
+    console.log(`Submission file downloaded as ${submissionFileName}`);
 
     // Download and validate mark.sh
     console.log('Downloading marking script...');
