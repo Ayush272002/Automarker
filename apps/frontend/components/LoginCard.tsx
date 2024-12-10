@@ -23,8 +23,10 @@ export function LoginCard() {
         >
           <Card className="transition-colors rounded-xl">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl">Student Login</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-center">
+                Student Login
+              </CardTitle>
+              <CardDescription className="text-center">
                 Access your assignments and submissions
               </CardDescription>
             </CardHeader>
@@ -47,8 +49,12 @@ export function LoginCard() {
         >
           <Card className="transition-colors rounded-xl">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl">Teacher Login</CardTitle>
-              <CardDescription>Manage assignments and grading</CardDescription>
+              <CardTitle className="text-2xl text-center">
+                Teacher Login
+              </CardTitle>
+              <CardDescription className="text-center">
+                Manage assignments and grading
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex h-20 items-center justify-center">

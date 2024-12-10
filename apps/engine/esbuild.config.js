@@ -3,6 +3,7 @@ const esbuild = require('esbuild');
 esbuild
   .build({
     entryPoints: ['./src/**/*.ts'],
+    loader: { '.node': 'file' },
     bundle: true,
     platform: 'node',
     outdir: 'dist',
