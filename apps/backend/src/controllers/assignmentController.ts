@@ -8,7 +8,6 @@ import {
 import { Request, Response } from 'express';
 import kafkaClient from '@repo/kafka/client';
 import { SUBMIT } from '@repo/topics/topics';
-import { RedisManager } from '../utils/redisManager';
 
 const allAssignments = async (req: Request, res: Response) => {
   try {
@@ -300,14 +299,6 @@ const submitAssignment = async (req: Request, res: Response) => {
   });
 
   await producer.disconnect();
-
-  const redisManager = RedisManager.getInstance();
-  let sentResponse = false;
-  redisManager.subscribe(SUBMIT, (message: any) => {
-    if (sentResponse) return;
-
-    console.log(message);
-  });
 
   return res.status(200).json({
     message: 'Marking complete.',
