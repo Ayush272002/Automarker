@@ -29,7 +29,7 @@ jobs:
 
       - name: Build and push engine image
         run: |
-          docker build -f docker/Dockerfile.mm -t ayush272002/automarker-engine:latest .
+          docker build -f docker/Dockerfile.engine -t ayush272002/automarker-engine:latest .
           docker push ayush272002/automarker-engine:latest
 
       - name: Verify backend image by pulling
