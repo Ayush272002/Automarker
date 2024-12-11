@@ -418,6 +418,78 @@ const getSubmissionStatus = async (req: Request, res: Response) => {
   }
 };
 
+const getAssignmentSubmissions = async (req: Request, res: Response) => {
+  const assignmentId = req.params.id;
+  const userId = req.body.userId;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        teacher: {
+          include: {
+            courses: {
+              include: {
+                assignments: {
+                  where: { id: assignmentId },
+                  include: {
+                    submissions: {
+                      include: {
+                        student: {
+                          include: {
+                            user: {
+                              select: {
+                                firstName: true,
+                                lastName: true,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user?.teacher) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+
+    const assignment = user.teacher.courses
+      .flatMap((course) => course.assignments)
+      .find((assignment) => assignment.id === assignmentId);
+
+    if (!assignment) {
+      return res.status(404).json({ message: 'Assignment not found' });
+    }
+
+    const submissions = assignment.submissions.map((submission) => ({
+      id: submission.id,
+      studentName: `${submission.student.user.firstName} ${submission.student.user.lastName}`,
+      submittedAt: submission.submittedAt,
+      marksAchieved: submission.marksAchieved,
+      logs: submission.logs,
+      assignmentZip: submission.assignmentZip,
+    }));
+
+    res.status(200).json({
+      assignment: {
+        title: assignment.title,
+        maxMarks: assignment.maxMarks,
+      },
+      submissions,
+    });
+  } catch (error) {
+    console.error('Error fetching assignment submissions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export {
   allAssignments,
   getAssignment,
@@ -425,4 +497,5 @@ export {
   createAssignment,
   submitAssignment,
   getSubmissionStatus,
+  getAssignmentSubmissions,
 };

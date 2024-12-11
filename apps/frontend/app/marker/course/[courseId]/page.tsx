@@ -55,6 +55,10 @@ export default function CourseAssignments({
     fetchAssignments();
   }, [courseId]);
 
+  const handleAssignmentClick = (assignmentId: string) => {
+    router.push(`/marker/course/${courseId}/assignment/${assignmentId}`);
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
       <motion.div
@@ -90,9 +94,17 @@ export default function CourseAssignments({
               key={assignment.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: '0px 10px 15px rgba(0, 0, 0, 0.2)',
+              }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
             >
-              <Card className="bg-gray-800 text-white">
+              <Card
+                className="bg-gray-800 text-white"
+                onClick={() => handleAssignmentClick(assignment.id)}
+              >
                 <CardHeader className="flex items-center space-x-3">
                   <FileText className="h-6 w-6 text-blue-400" />
                   <CardTitle>{assignment.title}</CardTitle>
