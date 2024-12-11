@@ -37,7 +37,7 @@ export default function AssignmentSubmissions({
 }: {
   params: { courseId: string; assignmentId: string };
 }) {
-  const { courseId, assignmentId } = params;
+  const { assignmentId } = params;
   const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
@@ -82,15 +82,6 @@ export default function AssignmentSubmissions({
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
-      <motion.div
-        className="absolute inset-0 bg-grid-pattern opacity-5 -z-10"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
-
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
