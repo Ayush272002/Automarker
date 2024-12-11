@@ -192,7 +192,7 @@ export default function AssignmentPage() {
               </motion.button>
             </DialogTrigger>
 
-            <DialogContent className="bg-[#f5fdc] text-black p-8 rounded-lg shadow-xl">
+            <DialogContent className="bg-stone-200 text-black p-8 rounded-lg shadow-xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold">
                   Upload Your Assignment
