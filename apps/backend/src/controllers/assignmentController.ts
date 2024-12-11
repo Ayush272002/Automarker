@@ -383,6 +383,15 @@ const getSubmissionStatus = async (req: Request, res: Response) => {
 
     const studentId = student.student.id;
 
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      select: { dueDate: true },
+    });
+
+    if (!assignment) {
+      return res.status(404).json({ message: 'Assignment not found.' });
+    }
+
     const submission = await prisma.submission.findFirst({
       where: {
         assignmentId,
@@ -407,11 +416,23 @@ const getSubmissionStatus = async (req: Request, res: Response) => {
       });
     }
 
-    return res.status(200).json({
-      status: 'graded',
-      marksAchieved: submission.marksAchieved,
-      logs: submission.logs,
-    });
+    const currentDate = new Date();
+    const dueDate = new Date(assignment.dueDate);
+
+    if (currentDate > dueDate) {
+      return res.status(200).json({
+        status: 'graded',
+        marksAchieved: submission.marksAchieved,
+        logs: submission.logs,
+      });
+    } else {
+      return res.status(200).json({
+        status: 'graded',
+        message:
+          'Assignment graded. Marks will be available after the due date.',
+        logs: submission.logs,
+      });
+    }
   } catch (error) {
     console.error('Error fetching submission status:', error);
     return res.status(500).json({ message: 'Internal server error.' });

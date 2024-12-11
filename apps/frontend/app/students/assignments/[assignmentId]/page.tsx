@@ -13,8 +13,8 @@ import {
   DialogContent,
   DialogClose,
   DialogHeader,
-  DialogFooter,
   DialogTitle,
+  DialogFooter,
   DialogDescription,
 } from '@repo/ui';
 
@@ -29,6 +29,7 @@ export default function AssignmentPage() {
   const [uploading, setUploading] = useState(false);
   const [submission, setSubmission] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dueDate, setDueDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!assignmentId) return;
@@ -42,6 +43,7 @@ export default function AssignmentPage() {
           }
         );
         setAssignment(response.data);
+        setDueDate(new Date(response.data.dueDate));
 
         const submissionResponse = await axios.get(
           `${API_BASE_URL}/api/v1/assignments/${assignmentId}/status`,
@@ -159,10 +161,16 @@ export default function AssignmentPage() {
           )}
         </div>
 
-        {submission?.status === 'graded' ? (
+        {submission?.status === 'graded' && dueDate && new Date() > dueDate ? (
           <div className="mt-4 p-4 bg-green-800 rounded-lg shadow-lg">
             <p className="text-lg font-bold text-green-400">
               Marks Achieved: {submission.marksAchieved} / {assignment.maxMarks}
+            </p>
+          </div>
+        ) : submission?.status === 'graded' ? (
+          <div className="mt-4 p-4 bg-yellow-800 rounded-lg shadow-lg">
+            <p className="text-lg font-bold text-yellow-400">
+              Assignment graded. Marks will be available after the due date.
             </p>
           </div>
         ) : submission?.status === 'submitted' ? (
