@@ -20,7 +20,7 @@ services:
   engine:
     image: ayush272002/automarker-engine:latest
     environment:
-      - KAFKA_URI=sepp-
+      - KAFKA_URI=
       - KAFKA_USERNAME=
       - KAFKA_PASSWORD=
       - DATABASE_URL=
