@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { Assignment } from 'types/Assignment';
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
-import { FileText, ArrowLeft } from 'lucide-react'; // Import an icon for the button
+import { FileText, ArrowLeft } from 'lucide-react';
 import MarkerNavbar from 'components/MarkerNavbar';
 import LogoutButton from 'components/LogoutButton';
 
