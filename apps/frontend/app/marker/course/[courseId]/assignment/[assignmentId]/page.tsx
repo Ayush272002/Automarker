@@ -37,7 +37,7 @@ export default function AssignmentSubmissions({
 }: {
   params: { courseId: string; assignmentId: string };
 }) {
-  const { courseId, assignmentId } = params;
+  const { assignmentId } = params;
   const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
