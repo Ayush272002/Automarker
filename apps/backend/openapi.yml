@@ -1,0 +1,466 @@
+openapi: 3.0.0
+info:
+  title: Automarker API
+  version: 1.0.0
+  description: API for managing assignments, submissions, and user interactions in an educational platform.
+
+servers:
+  - url: http://localhost:8000/api/v1
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+  schemas:
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [STUDENT, TEACHER]
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        maxMarks:
+          type: integer
+    Submission:
+      type: object
+      properties:
+        id:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        marksAchieved:
+          type: integer
+        logs:
+          type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+
+paths:
+  /users/signup:
+    post:
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User created successfully
+        '403':
+          description: User already exists
+        '411':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+  /users/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Logged in successfully
+        '403':
+          description: Invalid credentials
+        '500':
+          description: Internal server error
+
+  /users/logout:
+    post:
+      summary: User logout
+      responses:
+        '200':
+          description: Logged out successfully
+        '500':
+          description: An error occurred during logout
+
+  /users/user:
+    get:
+      summary: Get current user information
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /users/courses/all:
+    get:
+      summary: Get all courses for the current user
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Courses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  courses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /students/courses:
+    get:
+      summary: Get courses for the current student
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Courses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  courses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+        '404':
+          description: No courses found for this student
+        '500':
+          description: An error occurred while fetching courses
+
+  /teachers/dashboard:
+    get:
+      summary: Get teacher dashboard information
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Dashboard information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    studentCount:
+                      type: integer
+                    submitted:
+                      type: integer
+                    notSubmitted:
+                      type: integer
+        '404':
+          description: Teacher not found
+        '500':
+          description: Failed to fetch courses
+
+  /teachers/stats:
+    get:
+      summary: Get teacher statistics
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalCourses:
+                    type: integer
+                  totalStudents:
+                    type: integer
+                  totalSubmissions:
+                    type: integer
+                  pendingReviews:
+                    type: integer
+        '404':
+          description: Teacher not found
+        '500':
+          description: Failed to fetch stats
+
+  /assignments:
+    post:
+      summary: Create a new assignment
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                dueDate:
+                  type: string
+                  format: date-time
+                maxMarks:
+                  type: integer
+                courseId:
+                  type: string
+                markingScript:
+                  type: string
+                dockerFile:
+                  type: string
+                boilerplate:
+                  type: string
+      responses:
+        '201':
+          description: Assignment created successfully
+        '400':
+          description: Missing required fields
+        '404':
+          description: Course not found
+        '500':
+          description: Internal server error
+
+  /assignments/all:
+    get:
+      summary: Get all assignments for a course
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: query
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Assignments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '400':
+          description: Course ID is required
+        '403':
+          description: User not authorized or course not found
+        '404':
+          description: No assignments found for this course
+        '500':
+          description: Internal server error
+
+  /assignments/{id}:
+    get:
+      summary: Get a specific assignment
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Assignment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '403':
+          description: You do not have access to this assignment
+        '411':
+          description: Validation error
+        '500':
+          description: Internal server error
+    patch:
+      summary: Update an assignment
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+      responses:
+        '204':
+          description: Assignment updated successfully
+        '403':
+          description: You do not have access to this assignment or you cannot edit the assignment
+        '411':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+  /assignments/{id}/submit:
+    post:
+      summary: Submit an assignment
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignmentZip:
+                  type: string
+      responses:
+        '200':
+          description: Marking complete
+        '403':
+          description: You do not have access to this assignment or you cannot send a submission to this assignment
+        '411':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+  /assignments/{id}/status:
+    get:
+      summary: Get submission status for an assignment
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Submission status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [unsubmitted, submitted, graded]
+                  message:
+                    type: string
+                  marksAchieved:
+                    type: integer
+                  logs:
+                    type: string
+        '403':
+          description: User not authorized
+        '404':
+          description: Assignment not found
+        '500':
+          description: Internal server error
+
+  /assignments/{id}/submissions:
+    get:
+      summary: Get all submissions for an assignment
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Submissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignment:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      maxMarks:
+                        type: integer
+                  submissions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Submission'
+        '403':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
+        '500':
+          description: Internal server error
+
+security:
+  - cookieAuth: []
