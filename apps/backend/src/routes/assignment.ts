@@ -3,6 +3,7 @@ import {
   allAssignments,
   createAssignment,
   getAssignment,
+  getAssignmentSubmissions,
   getSubmissionStatus,
   submitAssignment,
   updateAssignment,
@@ -23,5 +24,7 @@ router
 router.post('/:id/submit', authMiddleware, submitAssignment);
 
 router.get('/:id/status', authMiddleware, getSubmissionStatus);
+
+router.get('/:id/submissions', authMiddleware, getAssignmentSubmissions);
 
 export const assignmentRouter = router;
