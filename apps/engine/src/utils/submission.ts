@@ -2,6 +2,7 @@ import { NodeSSH } from 'node-ssh';
 import fs from 'fs';
 import path from 'path';
 import prisma from '@repo/db/client';
+import { installDocker, installDos2unix } from './ec2Setup';
 
 async function convertLineEndings(ssh: NodeSSH, filePath: string) {
   const result = await ssh.execCommand(`
@@ -34,6 +35,10 @@ export async function processSubmission(submission: any) {
 
     await ssh.connect({ host, username, privateKey });
     console.log('Connected to EC2 instance.');
+
+    console.log('Installing required packages on EC2...');
+    await installDos2unix(ssh);
+    await installDocker(ssh);
 
     const remoteWorkDir = `/tmp/${assignmentId}_work`;
 
