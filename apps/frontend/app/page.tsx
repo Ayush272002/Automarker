@@ -35,7 +35,7 @@ export default function Page() {
         </section>
       </main>
       <footer className="border-t border-gray-300 py-6">
-        <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row">
+        <div className="container flex flex-col items-center justify-center gap-4 text-center">
           <motion.p
             className="text-sm text-gray-300"
             initial={{ opacity: 0 }}
