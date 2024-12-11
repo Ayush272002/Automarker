@@ -11,8 +11,10 @@ import {
   CardTitle,
   Progress,
 } from '@repo/ui';
-import { CalendarDays, ClipboardList, Home, User } from 'lucide-react';
+import { CalendarDays, ClipboardList, User } from 'lucide-react';
 import Link from 'next/link';
+import StudentNavbar from 'components/StudentNavbar';
+import LogoutButton from 'components/LogoutButton';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -76,42 +78,12 @@ export default function StudentDashboard() {
         initial={{ x: -200 }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="w-64 bg-gradient-to-b from-gray-900 to-gray-800 p-6 shadow-lg"
+        className="w-64 bg-gradient-to-b from-gray-900 to-gray-800 p-6 shadow-lg flex flex-col justify-between"
       >
-        <div className="flex items-center space-x-3">
-          <Home className="h-6 w-6 text-blue-400" />
-          <h1 className="text-xl font-bold">Student Dashboard</h1>
+        <StudentNavbar />
+        <div className="mt-6">
+          <LogoutButton />
         </div>
-        <nav className="mt-6 space-y-4">
-          <Link
-            href="/student/dashboard"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <Home className="h-5 w-5" />
-            <span>Dashboard</span>
-          </Link>
-          <Link
-            href="/student/courses"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <ClipboardList className="h-5 w-5" />
-            <span>My Courses</span>
-          </Link>
-          <Link
-            href="/student/calendar"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <CalendarDays className="h-5 w-5" />
-            <span>Calendar</span>
-          </Link>
-          <Link
-            href="/student/grades"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <User className="h-5 w-5" />
-            <span>Grades</span>
-          </Link>
-        </nav>
       </motion.aside>
 
       <motion.main

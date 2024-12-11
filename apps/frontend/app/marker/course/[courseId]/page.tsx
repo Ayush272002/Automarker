@@ -6,7 +6,9 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { Assignment } from 'types/Assignment';
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
-import { FileText } from 'lucide-react';
+import { FileText, ArrowLeft } from 'lucide-react';
+import MarkerNavbar from 'components/MarkerNavbar';
+import LogoutButton from 'components/LogoutButton';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -59,16 +61,34 @@ export default function CourseAssignments({
     router.push(`/marker/course/${courseId}/assignment/${assignmentId}`);
   };
 
+  const handleDashboardRedirect = () => {
+    router.push('/marker/dashboard');
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative">
-      <motion.div
-        className="absolute inset-0 bg-grid-pattern opacity-5 -z-10"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
+      <aside className="w-64 bg-gradient-to-b from-gray-800 to-gray-700 p-6 shadow-lg flex flex-col justify-between">
+        <motion.div
+          initial={{ x: -100 }}
+          animate={{ x: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        >
+          <div>
+            <MarkerNavbar />
+          </div>
+          <button
+            onClick={handleDashboardRedirect}
+            className="flex items-center space-x-2 text-white bg-blue-500 py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition-all duration-200 mt-5"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span>Go to Dashboard</span>
+          </button>
+
+          <div className="mt-6">
+            <LogoutButton />
+          </div>
+        </motion.div>
+      </aside>
 
       <motion.main
         initial={{ opacity: 0 }}
