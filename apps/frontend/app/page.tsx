@@ -9,7 +9,7 @@ export default function Page() {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 flex justify-center">
         <section className="container flex flex-col items-center justify-center space-y-8 py-12 md:py-24 lg:py-32">
           <motion.div
             className="mx-auto flex max-w-[980px] flex-col items-center gap-4 text-center"
@@ -35,14 +35,15 @@ export default function Page() {
         </section>
       </main>
       <footer className="border-t border-gray-300 py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 text-center md:flex-row">
+        <div className="container flex flex-col items-center justify-center gap-4 text-center">
           <motion.p
             className="text-sm text-gray-300"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            © {new Date().getFullYear()} University Name. All rights reserved.
+            © {new Date().getFullYear()} University of Birmingham. All rights
+            reserved.
           </motion.p>
           <motion.nav
             className="flex gap-4"

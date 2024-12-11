@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
 import { ClipboardList, CheckSquare, FileCheck, User } from 'lucide-react';
 import Link from 'next/link';
 import { Course } from 'types/Course';
