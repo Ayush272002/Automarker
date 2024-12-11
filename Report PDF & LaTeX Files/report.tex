@@ -1,7 +1,25 @@
 \documentclass[a4paper, 12pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage[margin=1in]{geometry}
+\usepackage{indentfirst}
 \usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{lipsum}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage{media9}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=cyan,
+}
+
+\definecolor{shadecolor}{gray}{0.9}
+\newtcolorbox{example}{colback=shadecolor,grow to right by=-30pt,grow to left by=-30pt,breakable,adjusted title={Example}}
+
+\newcommand{\Example}[1]{\begin{example}#1\end{example}}
 
 \begin{document}
 \title{HESS - CRSR - Automarker (Amongsus) Report}
@@ -9,11 +27,57 @@
 \date{7th December 2024}
 \maketitle
 
-\section*{Summary}
-% TODO
+\section*{Link to the online repository}
+\noindent\url{https://github.com/Ayush272002/Automarker}
 
-\section*{Report}
-% TODO
+\section*{Summary}
+We decided to use Ayush's EDR for our prototype. As Module Organisers could need more customisability than pre-built containers, we changed our prototype to allow them to upload a Dockerfile along with a test file that would be executed inside the docker container. We were able to make a working version of the auto-marking system described in the EDR. The system is able to run the submitted programming assignment against tests defined in test file. The markers can customise the test file as much as they like. The system also reduces human error as the code will be executed and the marks will be calculated based on the output of the test file. As per non-functional requirements, we were able to allow our system to mark code for any possible programming language (as long as there is a way to mark it with a shell file and a Dockerfile). As the CSRS product has an open API for developers to use, we included our submission API in the existing open API so that technically-savy users can automate parts of submission.
+
+\section*{Accomplishments}
+To keep track of the development process, we decided to use GitHub Issues (see Fig.~\ref{fig:issues}). We also used Discord to communicate with each other, including weekly meetings, general calls to help each other and keep track of what is being updated in the repository, etc, and we took detailed meeting notes every meeting. To make sure our code works before it is merged into the main branch, we first individually tested our code by simply running it, then a pre-commit hook makes sure the code builds before a commit is made. Once the pre-commit hook succeeds, we would create a Pull Request for the feature being made. The repository restricts merging until a reviewer other than themself approves it, and requires that the CI check passes. Once merged, our CD pipeline builds the backend and engine docker images and pushes it into the dockerhub and verifies that it has been pushed. The CI pipeline also runs after a merge occurs into the main branch to make sure the merged code does not fail any tests.
+
+\subsection*{Project Management}
+We implemented the Agile development strategy, which was easiest for our team to work with as implementing a system like our prototype can and will have bugs that we would potentially run into during development.
+
+In our first meeting for this project, we decided that Vivan would work mainly on the backend, Ayush would work mainly on the engine, devops, and some parts of the backend, James would work mainly on the student frontend, and Selahattin would work mainly on the marker frontend. Since James and Selahattin worked mainly on parts of the frontend, they also worked on the UX for the website. During development, James and Selahattin had a lot of questions, so Vivan and Ayush collaborated with them throughout the frontend development process.
+
+Many times, the frotnend team needed to communicate with the backend team about what the backend would return in specific API routes. Sometimes, team members had written entire features including frontend and backend parts. This would be communicated beforehand so that other group members would not be confused. This would lead to many parts of each of the system being completed quicker as more features would be implemented at the same time.
+
+\subsection*{Planning}
+Throughout the entire project, each member was transparent on what work they finished, what they need to finish, and what they needed help with. We also set deadlines so that each feature would be completed and tested thouroughly on time. There were times that a feature was not finished by a deadline due to complex errors that had to be debugged multiple times by other group members.
+
+\Example {There was an issue where the CI pipeline could not build the project as it was reporting a very generic error, however, it was successfully building on all machines within the group. After doing tons of research, we found that we simply needed to add an optional dependency in the \emph{package.json} file}
+
+As per our planning, we finished the project 2 days before the dealine of the prototype, all thanks to our planning that allowed deadlines to be moved whenever needed. We used the remaining time to polish the project by cleaning up some of the code and increase the project's efficiency.
+
+Like any group, we also had a few miscommunications that occurred throughout the development process:
+
+\Example {In the beginning of the project, one of our group members decided to use MUI as the components library without informing the others. However, in our first meeting, we had decided to use shadcn as our components library. In the next meeting, we discussed if we should continue to use shadcn or if we should switch to MUI for our components library. In the end, we decided to stick to shadcn.}
+         
+There were also times where two teammates had different ways a problem could be fixed, and both preferred their own fix. To resolve this conflict, we would have a meeting that would attempt to find a middleground. We would discuss the pros and cons of each approach, and we would try and merge both solutions to include as many pros from both approaches and leave out as many cons from both approaches.
+
+\subsection*{Technical Achievments}
+We decided to use a monorepo for our project as we knew there would be shared code which would implement the DRY coding practice. Our frontend used NextJS, our backend used ExpressJS, and our engine (microservice) uses NodeJS. We used Kafka for our async communication system. All systems were implemented in Typescript. We also used Storybook to individually test our components in isolation.
+
+We built our prototype to be very scalable, which is why our prototype uses a microservice-based system architecture (see Fig.~\ref{fig:system-architecture}). We used Prometheus and Grafana to monitor our backend API services. We also included an OpenAPI spec in our backend to allow technically-savy people to automate parts of this new system.
+
+% We were able to make our prototype as close to a full product as we could with the time given for this project. We made sure there are little to no hard-coded values, as users can create student accounts and markers can create assignments, and the engine would mark the submissions as per the provided test script when the assignment is created. 
+
+If our product is ran in production, it would be able to withstand a high volume of requests and submissions (provided that load-balancing is implemented in the production server). If needed, multiple instances of the engine can be ran to increase the marking speed of submissions (this can be done with a kubernetes cluster as well).
+
+\section*{Images}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Screenshot 2024-12-10 at 21.39.08.png}
+    \caption{Screenshot of all Github issues used to keep track of development}
+    \label{fig:issues}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{System Architecture.png}
+    \caption{Screenshot of our System Architecture Design}
+    \label{fig:system-architecture}
+\end{figure}
 
 \section*{Reflections}
 \begin{enumerate}
