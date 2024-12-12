@@ -5,13 +5,6 @@ As the name suggests its an automarking application which allows the teacher to 
 
 Currently the engine is configured to 4 tests and the log should be in the format `Number of tests passed: 3` which can be configured and made more dynamic.
 
-NOTE : Docker and dos2unix must be installed in the EC2 instance. 
-- Docker installation guide is [here](https://docs.docker.com/engine/install/)
-- for installing dos2unix use the following command
-```shell
-sudo apt-get update && sudo apt-get install -y dos2unix
-```
-
 There is also an OpenAPI spec present inside `apps/backend` which documents all the API endpoints, so the API can be used by developers.
 
 ## System Design
