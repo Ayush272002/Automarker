@@ -158,5 +158,3 @@ export async function processSubmission(submission: any) {
     throw error;
   }
 }
-
-// sudo apt-get update && sudo apt-get install -y dos2unix
