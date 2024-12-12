@@ -12,6 +12,8 @@ NOTE : Docker and dos2unix must be installed in the EC2 instance.
 sudo apt-get update && sudo apt-get install -y dos2unix
 ```
 
+There is also an OpenAPI spec present inside `apps/backend` which documents all the API endpoints, so the API can be used by developers.
+
 ## System Design
 Below is the system design for the application.
 
@@ -108,6 +110,9 @@ docker-compose down
 This will shut down the running services and remove the containers.
 
 ---
+
+### Report 
+The report of the prototype could be found in the `Report PDF & LaTeX Files`
 
 ### Troubleshooting
 
