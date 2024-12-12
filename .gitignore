@@ -37,3 +37,8 @@ yarn-error.log*
 .DS_Store
 *.pem
 .idea/
+
+# Report Latex
+report.*
+!report.tex
+!report.pdf
