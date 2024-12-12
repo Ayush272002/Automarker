@@ -1,40 +1,28 @@
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 export function SiteHeader() {
   return (
     <header className="w-full border-b bg-background">
-      <div className="container flex h-16 items-center">
+      <div className="flex h-16 items-center">
         <Link href="/" className="flex items-center space-x-2 ml-[2rem]">
           <span className="text-xl font-bold text-primary">
             University Portal
           </span>
         </Link>
         <nav className="ml-auto flex items-center space-x-6 mr-[2rem]">
-          <motion.div
-            whileHover={{ scale: 1.1, color: '#3b82f6' }}
-            whileTap={{ scale: 0.95 }}
-            className="transition-transform"
+          <div
+            className="transition-all text-sm text-muted-foreground hover:text-primary hover:scale-110 hover:text-[#3b82f6] active:scale-95 cursor-pointer"
+            onClick={() => toast.error('Feature coming soon.')}
           >
-            <Link
-              href="/help"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Help
-            </Link>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.1, color: '#3b82f6' }}
-            whileTap={{ scale: 0.95 }}
-            className="transition-transform"
+            Help
+          </div>
+          <div
+            className="transition-all text-sm text-muted-foreground hover:text-primary hover:scale-110 hover:text-[#3b82f6] active:scale-95 cursor-pointer"
+            onClick={() => toast.error('Feature coming soon.')}
           >
-            <Link
-              href="/contact"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Contact
-            </Link>
-          </motion.div>
+            Contact
+          </div>
         </nav>
       </div>
     </header>

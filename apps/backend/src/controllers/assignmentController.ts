@@ -8,7 +8,6 @@ import {
 import { Request, Response } from 'express';
 import kafkaClient from '@repo/kafka/client';
 import { SUBMIT } from '@repo/topics/topics';
-import { RedisManager } from '../utils/redisManager';
 
 const allAssignments = async (req: Request, res: Response) => {
   try {
@@ -112,6 +111,7 @@ const getAssignment = async (req: Request, res: Response) => {
                   createdAt: true,
                   updatedAt: true,
                   maxMarks: true,
+                  boilerplate: true,
                 },
                 where: {
                   id: parsedData.data.assignmentId,
@@ -151,6 +151,7 @@ const getAssignment = async (req: Request, res: Response) => {
     });
   }
 
+  console.log(assignmentDescription);
   return res.status(200).json({ ...assignmentDescription });
 };
 
@@ -240,7 +241,7 @@ const submitAssignment = async (req: Request, res: Response) => {
                 },
                 select: {
                   markingScript: true,
-                  requiredFiles: true,
+                  dockerFile: true,
                 },
               },
             },
@@ -260,9 +261,10 @@ const submitAssignment = async (req: Request, res: Response) => {
   const assignmentZip = parsedData.data.assignmentZip;
   const payload = {
     markingScript: user.student.courses[0].assignments[0].markingScript,
-    requiredFiles: user.student.courses[0].assignments[0].requiredFiles,
-    studentId: parsedData.data.userId,
+    dockerFile: user.student.courses[0].assignments[0].dockerFile,
+    userId: parsedData.data.userId,
     assignmentId: parsedData.data.assignmentId,
+    uploadLink: parsedData.data.assignmentZip,
   };
 
   await prisma.submission.create({
@@ -298,22 +300,22 @@ const submitAssignment = async (req: Request, res: Response) => {
 
   await producer.disconnect();
 
-  const redisManager = RedisManager.getInstance();
-  let sentResponse = false;
-  redisManager.subscribe(SUBMIT, (message) => {
-    if (sentResponse) return;
-
-    console.log(message);
-  });
-
   return res.status(200).json({
     message: 'Marking complete.',
   });
 };
 
 const createAssignment = async (req: Request, res: Response) => {
-  const { title, description, dueDate, maxMarks, courseId, markingScript } =
-    req.body;
+  const {
+    title,
+    description,
+    dueDate,
+    maxMarks,
+    courseId,
+    markingScript,
+    dockerFile,
+    boilerplate,
+  } = req.body;
 
   if (!title || !dueDate || !maxMarks || !courseId) {
     return res.status(400).json({
@@ -340,6 +342,8 @@ const createAssignment = async (req: Request, res: Response) => {
         maxMarks: parseInt(maxMarks, 10),
         courseId,
         markingScript,
+        dockerFile,
+        boilerplate,
       },
     });
 
@@ -355,10 +359,164 @@ const createAssignment = async (req: Request, res: Response) => {
   }
 };
 
+const getSubmissionStatus = async (req: Request, res: Response) => {
+  const assignmentId = req.params.id;
+  const userId = req.body.userId;
+
+  try {
+    const student = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        student: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!student?.student) {
+      return res.status(403).json({ message: 'User not authorized.' });
+    }
+
+    const studentId = student.student.id;
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      select: { dueDate: true },
+    });
+
+    if (!assignment) {
+      return res.status(404).json({ message: 'Assignment not found.' });
+    }
+
+    const submission = await prisma.submission.findFirst({
+      where: {
+        assignmentId,
+        studentId,
+      },
+      select: {
+        submittedAt: true,
+        marksAchieved: true,
+        logs: true,
+      },
+    });
+
+    if (!submission) {
+      return res.status(200).json({ status: 'unsubmitted' });
+    }
+
+    if (submission.marksAchieved === -1) {
+      return res.status(200).json({
+        status: 'submitted',
+        message: 'Submission is under evaluation.',
+        logs: submission.logs,
+      });
+    }
+
+    const currentDate = new Date();
+    const dueDate = new Date(assignment.dueDate);
+
+    if (currentDate > dueDate) {
+      return res.status(200).json({
+        status: 'graded',
+        marksAchieved: submission.marksAchieved,
+        logs: submission.logs,
+      });
+    } else {
+      return res.status(200).json({
+        status: 'graded',
+        message:
+          'Assignment graded. Marks will be available after the due date.',
+        logs: submission.logs,
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching submission status:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+const getAssignmentSubmissions = async (req: Request, res: Response) => {
+  const assignmentId = req.params.id;
+  const userId = req.body.userId;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        teacher: {
+          include: {
+            courses: {
+              include: {
+                assignments: {
+                  where: { id: assignmentId },
+                  include: {
+                    submissions: {
+                      include: {
+                        student: {
+                          include: {
+                            user: {
+                              select: {
+                                firstName: true,
+                                lastName: true,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user?.teacher) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+
+    const assignment = user.teacher.courses
+      .flatMap((course) => course.assignments)
+      .find((assignment) => assignment.id === assignmentId);
+
+    if (!assignment) {
+      return res.status(404).json({ message: 'Assignment not found' });
+    }
+
+    const submissions = assignment.submissions.map((submission) => ({
+      id: submission.id,
+      studentName: `${submission.student.user.firstName} ${submission.student.user.lastName}`,
+      submittedAt: submission.submittedAt,
+      marksAchieved: submission.marksAchieved,
+      logs: submission.logs,
+      assignmentZip: submission.assignmentZip,
+    }));
+
+    res.status(200).json({
+      assignment: {
+        title: assignment.title,
+        maxMarks: assignment.maxMarks,
+      },
+      submissions,
+    });
+  } catch (error) {
+    console.error('Error fetching assignment submissions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export {
   allAssignments,
   getAssignment,
   updateAssignment,
   createAssignment,
   submitAssignment,
+  getSubmissionStatus,
+  getAssignmentSubmissions,
 };

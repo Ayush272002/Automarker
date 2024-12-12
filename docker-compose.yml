@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ayush272002/automarker-backend:latest
+    environment:
+      - PORT=8000
+      - JWT_SECRET=secret
+      - ALLOWED_ORIGINS=http://localhost:3000,ksgdkq
+      - DATABASE_URL=
+      - KAFKA_URI=
+      - KAFKA_USERNAME=
+      - KAFKA_PASSWORD=
+    ports:
+      - 8000:8000
+    networks:
+      - app_network
+      - monitoring
+
+  engine:
+    image: ayush272002/automarker-engine:latest
+    environment:
+      - KAFKA_URI=
+      - KAFKA_USERNAME=
+      - KAFKA_PASSWORD=
+      - DATABASE_URL=
+      - PRIVATE_KEY=/private_key.pem # Path inside the container
+      - HOST=
+      - AWS_USERNAME=ubuntu
+    volumes:
+      - /path/to/your/aws/private/key:/private_key.pem:ro # Map local file to container
+    networks:
+      - app_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml # Prometheus config file path
+    ports:
+      - '9090:9090'
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring
+
+networks:
+  app_network:
+  monitoring:

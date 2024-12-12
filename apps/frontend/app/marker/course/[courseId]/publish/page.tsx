@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { UploadClient } from '@uploadcare/upload-client';
+import { Loader2 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -16,20 +17,24 @@ export default function PublishAssignment() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [maxMarks, setMaxMarks] = useState('');
-  const [markingScript, setMarkingScript] = useState<string | null>(null);
+  const [markingScript, setMarkingScript] = useState<File | null>(null);
+  const [dockerFile, setDockerFile] = useState<File | null>(null);
+  const [boilerPlateCode, setBoilerPlateCode] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File): Promise<string | null> => {
     const client = new UploadClient({
       publicKey: process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY!,
     });
 
     try {
       const result = await client.uploadFile(file);
-      setMarkingScript(result.cdnUrl);
-      toast.success('Marking script uploaded successfully!');
+      toast.success(`${file.name} uploaded successfully!`);
+      return result.cdnUrl;
     } catch (error) {
       console.error('File upload failed:', error);
-      toast.error('Failed to upload marking script.');
+      toast.error(`Failed to upload ${file.name}.`);
+      return null;
     }
   };
 
@@ -39,7 +44,22 @@ export default function PublishAssignment() {
       return;
     }
 
+    if (!markingScript || !dockerFile || !boilerPlateCode) {
+      toast.error('Please upload all the required files.');
+      return;
+    }
+
+    setUploading(true);
     try {
+      const markingScriptUrl = await handleFileUpload(markingScript);
+      const dockerFileUrl = await handleFileUpload(dockerFile);
+      const boilerPlateCodeUrl = await handleFileUpload(boilerPlateCode);
+
+      if (!markingScriptUrl || !dockerFileUrl || !boilerPlateCodeUrl) {
+        toast.error('File uploads failed. Please try again.');
+        return;
+      }
+
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/assignments`,
         {
@@ -48,7 +68,9 @@ export default function PublishAssignment() {
           dueDate: new Date(dueDate).toISOString(),
           maxMarks: parseInt(maxMarks, 10),
           courseId,
-          markingScript,
+          markingScript: markingScriptUrl,
+          dockerFile: dockerFileUrl,
+          boilerplate: boilerPlateCodeUrl,
         },
         {
           withCredentials: true,
@@ -62,6 +84,8 @@ export default function PublishAssignment() {
     } catch (error) {
       console.error('Assignment creation failed:', error);
       toast.error('Failed to publish assignment.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -105,29 +129,43 @@ export default function PublishAssignment() {
               onChange={(e) => setMaxMarks(e.target.value)}
             />
 
-            <label className="block text-gray-400">
-              Marking Script (optional):
-            </label>
+            <label className="block text-gray-400">Marking Script :</label>
             <input
               type="file"
               className="w-full p-2 rounded bg-gray-700 text-white"
               onChange={(e) => {
-                if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                if (e.target.files?.[0]) setMarkingScript(e.target.files[0]);
               }}
             />
-            {markingScript && (
-              <p className="text-sm text-green-400">
-                Uploaded successfully:{' '}
-                <a href={markingScript} target="_blank">
-                  {markingScript}
-                </a>
-              </p>
-            )}
+
+            <label className="block text-gray-400">Docker File :</label>
+            <input
+              type="file"
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              onChange={(e) => {
+                if (e.target.files?.[0]) setDockerFile(e.target.files[0]);
+              }}
+            />
+
+            <label className="block text-gray-400">Boiler Plate Code :</label>
+            <input
+              type="file"
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              onChange={(e) => {
+                if (e.target.files?.[0]) setBoilerPlateCode(e.target.files[0]);
+              }}
+            />
 
             <button
-              className="w-full bg-blue-600 text-white py-2 rounded mt-4 hover:bg-blue-700"
+              className={`w-full bg-blue-600 text-white py-2 rounded mt-4 hover:bg-blue-700 ${
+                uploading ? 'cursor-not-allowed opacity-50' : ''
+              }`}
+              disabled={uploading}
               onClick={handleSubmit}
             >
+              {uploading ? (
+                <Loader2 className="animate-spin h-5 w-5 inline-block mr-2" />
+              ) : null}
               Publish Assignment
             </button>
           </div>

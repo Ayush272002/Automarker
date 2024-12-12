@@ -6,6 +6,9 @@ import { teacherRouter } from './routes/teacher';
 import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user';
 import { assignmentRouter } from './routes/assignment';
+import client from 'prom-client';
+import { metricsMiddleware } from './middlewares/metrics';
+
 dotenv.config();
 
 const app = express();
@@ -29,6 +32,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use(metricsMiddleware);
 
 const PORT = process.env.PORT || 8000;
 
@@ -36,6 +40,12 @@ app.use('/api/v1/students', studentRouter);
 app.use('/api/v1/teachers', teacherRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/assignments', assignmentRouter);
+
+app.get('/metrics', async (req: Request, res: Response) => {
+  const metrics = await client.register.metrics();
+  res.set('Content-Type', client.register.contentType);
+  res.end(metrics);
+});
 
 //global catch
 app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
@@ -45,6 +55,14 @@ app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
   });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

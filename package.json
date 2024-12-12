@@ -12,6 +12,7 @@
     "db:migrate": "cd packages/db && npx prisma migrate dev && cd ../..",
     "build:frontend": "cd apps/frontend && npm run build && cd ../..",
     "start:frontend": "cd apps/frontend && npm run start && cd ../..",
+    "dev:frontend": "cd apps/frontend && npm run dev && cd ../..",
     "build:backend": "cd apps/backend && npm run build && cd ../..",
     "start:backend": "cd apps/backend && npm run start && cd ../..",
     "build:engine": "cd apps/engine && npm run build && cd ../..",

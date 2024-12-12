@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
 import { ClipboardList, CheckSquare, FileCheck, User } from 'lucide-react';
 import Link from 'next/link';
 import { Course } from 'types/Course';
 import { Stats } from 'types/Stats';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import LogoutButton from 'components/LogoutButton';
+import MarkerNavbar from 'components/MarkerNavbar';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -73,42 +75,12 @@ export default function MarkerDashboard() {
         initial={{ x: -200 }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="w-64 bg-gradient-to-b from-gray-800 to-gray-700 p-6 shadow-lg z-10"
+        className="w-64 bg-gradient-to-b from-gray-800 to-gray-700 p-6 shadow-lg z-10 flex flex-col justify-between"
       >
-        <div className="flex items-center space-x-3">
-          <ClipboardList className="h-6 w-6 text-blue-400" />
-          <h1 className="text-xl font-bold">Marker Dashboard</h1>
+        <MarkerNavbar />
+        <div className="mt-6">
+          <LogoutButton />
         </div>
-        <nav className="mt-6 space-y-4">
-          <Link
-            href="/marker/dashboard"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <ClipboardList className="h-5 w-5" />
-            <span>Dashboard</span>
-          </Link>
-          <Link
-            href="/marker/courses"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <FileCheck className="h-5 w-5" />
-            <span>Courses</span>
-          </Link>
-          <Link
-            href="/marker/submissions"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <CheckSquare className="h-5 w-5" />
-            <span>Submissions</span>
-          </Link>
-          <Link
-            href="/marker/profile"
-            className="flex items-center space-x-2 hover:text-blue-400"
-          >
-            <User className="h-5 w-5" />
-            <span>Profile</span>
-          </Link>
-        </nav>
       </motion.aside>
 
       <motion.main
